@@ -1,401 +1,406 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Śpiewnik Psie Pole</title>
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#0f172a">
-    <style>
-        :root {
-            --bg-color: #0f172a;
-            --card-bg: #1e293b;
-            --primary: #38bdf8;
-            --primary-hover: #0284c7;
-            --accent: #818cf8;
-            --text: #f1f5f9;
-            --text-muted: #94a3b8;
-            --border: #334155;
-            --glow: rgba(56, 189, 248, 0.15);
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Śpiewnik Psie Pole</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1a202c">
+  <style>
+    :root {
+      --bg-color: #0f172a;
+      --card-bg: #1e293b;
+      --primary: #38bdf8;
+      --primary-hover: #0284c7;
+      --text-main: #f8fafc;
+      --text-sub: #94a3b8;
+      --accent: #f59e0b;
+      --danger: #ef4444;
+    }
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      margin: 0;
+      padding: 16px;
+      display: flex;
+      justify-content: center;
+    }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text);
-            margin: 0; padding: 12px;
-            display: flex; justify-content: center; min-height: 100vh;
-        }
+    .container {
+      width: 100%;
+      max-width: 600px;
+    }
 
-        .container {
-            width: 100%; max-width: 480px;
-            background: var(--card-bg); padding: 20px 16px;
-            border-radius: 16px; border: 1px solid var(--border);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 24px var(--glow);
-            display: flex; flex-direction: column; height: fit-content;
-        }
+    header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
 
-        h1 { text-align: center; color: var(--primary); font-size: 22px; letter-spacing: 1px; margin: 0 0 16px 0; font-weight: 700; }
-        h2 { text-align: center; color: var(--accent); font-size: 18px; margin: 0 0 16px 0; font-weight: 600; }
+    h1 {
+      color: var(--primary);
+      font-size: 1.8rem;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
 
-        .home-banner {
-            width: 100%; height: 320px; object-fit: cover;
-            border-radius: 12px; border: 1px solid var(--border);
-            margin-bottom: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-        }
+    .hero-img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+      margin-bottom: 20px;
+    }
 
-        .vertical-menu { display: flex; flex-direction: column; gap: 12px; width: 100%; }
+    .btn {
+      background-color: var(--primary);
+      color: #000;
+      font-weight: bold;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      width: 100%;
+      font-size: 1rem;
+      cursor: pointer;
+      margin-bottom: 10px;
+      transition: background 0.2s;
+    }
 
-        .btn {
-            display: flex; align-items: center; justify-content: center;
-            width: 100%; padding: 14px 16px; background-color: #0f172a;
-            color: var(--primary); border: 1px solid var(--primary);
-            border-radius: 12px; font-size: 15px; font-weight: 600;
-            cursor: pointer; text-align: center; transition: all 0.2s ease;
-        }
+    .btn:hover {
+      background-color: var(--primary-hover);
+      color: #fff;
+    }
 
-        .btn:active { background-color: var(--primary); color: #0f172a; transform: scale(0.98); }
-        .btn-accent { background-color: var(--primary); color: #0f172a; font-weight: 700; }
-        .btn-back { border-color: #475569; color: var(--text-muted); margin-bottom: 16px; padding: 8px 14px; width: fit-content; font-size: 13px; }
+    .btn-secondary {
+      background-color: transparent;
+      color: var(--primary);
+      border: 2px solid var(--primary);
+    }
 
-        .hidden { display: none !important; }
+    .btn-small {
+      width: auto;
+      padding: 6px 12px;
+      font-size: 0.85rem;
+      margin: 4px 0;
+    }
 
-        .toolbar { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; justify-content: center; align-items: center; }
-        .tool-btn { padding: 8px 12px; background: #334155; border: 1px solid var(--border); color: var(--primary); border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; }
+    .btn-add-meeting {
+      background-color: var(--accent);
+      color: #000;
+      border: none;
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      font-size: 1.2rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-left: auto;
+    }
 
-        .transpose-group { display: flex; align-items: center; gap: 4px; background: #0f172a; padding: 2px 8px; border-radius: 8px; border: 1px solid var(--border); }
-        .transpose-label { font-size: 12px; color: var(--text-muted); font-weight: 600; }
+    .search-box, select, input, textarea {
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid #334155;
+      background-color: #1e293b;
+      color: white;
+      box-sizing: border-box;
+      margin-bottom: 12px;
+      font-size: 1rem;
+    }
 
-        .media-section { margin-bottom: 16px; padding: 12px; background: #0f172a; border: 1px solid var(--border); border-radius: 10px; display: flex; flex-direction: column; gap: 10px; }
-        audio { width: 100%; height: 40px; }
+    .meeting-section {
+      background: linear-gradient(135deg, #1e293b, #334155);
+      border: 2px solid var(--accent);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 24px;
+    }
 
-        .song-container { display: flex; flex-direction: column; gap: 16px; background: #0f172a; padding: 16px; border-radius: 12px; border: 1px solid var(--border); }
-        .song-text { white-space: pre-wrap; font-size: 16px; line-height: 1.7; color: #f8fafc; word-break: break-word; }
-        .song-chords { white-space: pre-wrap; font-size: 16px; font-weight: 600; color: var(--accent); line-height: 1.7; background: rgba(129, 140, 248, 0.1); padding: 14px; border-radius: 8px; border-left: 3px solid var(--accent); word-break: break-word; }
+    .meeting-section h2 {
+      color: var(--accent);
+      margin-top: 0;
+      font-size: 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
 
-        label { display: block; margin-top: 10px; font-weight: 600; color: var(--accent); font-size: 13px; }
-        input, select, textarea { width: 100%; padding: 12px; margin-top: 4px; margin-bottom: 10px; border: 1px solid var(--border); border-radius: 8px; background: #0f172a; color: var(--text); font-size: 15px; }
-        iframe { width: 100%; height: 350px; border: none; border-radius: 8px; }
-    </style>
+    .song-card {
+      background-color: var(--card-bg);
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 12px;
+      border: 1px solid #334155;
+    }
+
+    .song-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .song-title {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: var(--primary);
+      margin: 0;
+    }
+
+    .song-category {
+      font-size: 0.8rem;
+      background-color: #334155;
+      padding: 2px 8px;
+      border-radius: 12px;
+      color: var(--text-sub);
+    }
+
+    .chords {
+      background-color: #0f172a;
+      color: var(--accent);
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-family: monospace;
+      white-space: pre-wrap;
+      margin: 10px 0;
+      display: none; /* Domyślnie ukryte */
+    }
+
+    .lyrics {
+      white-space: pre-wrap;
+      line-height: 1.5;
+      margin-top: 10px;
+    }
+
+    .media-links {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+
+    .media-btn {
+      background-color: #334155;
+      color: white;
+      text-decoration: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .hidden {
+      display: none;
+    }
+  </style>
 </head>
 <body>
 
 <div class="container">
-    <!-- EKRAN GŁÓWNY -->
-    <div id="view-home">
-        <h1>ŚPIEWNIK PSIE POLE</h1>
-        <img id="home-image" class="home-banner" src="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=800&q=80" alt="Muzyka liturgiczna">
-        
-        <div class="vertical-menu">
-            <button class="btn btn-accent" onclick="showCategories()">📖 Przeglądaj Śpiewnik</button>
-            <button class="btn" onclick="showFormWithPin()">➕ Dodaj Nowy Utwór</button>
-        </div>
+  <header>
+    <h1>Śpiewnik Psie Pole</h1>
+    <img src="https://media.istockphoto.com/id/2161124245/photo/christians-raising-their-hands-in-praise-and-worship-at-a-night-music-concert.jpg?s=612x612&w=0&k=20&c=2Lt_xDFW_Wt4V20K_BA2fH43ta9hBbQP_y6NfvBjjI0=" alt="Uwielbienie" class="hero-img">
+  </header>
+
+  <!-- Widok Główny -->
+  <div id="main-view">
+    <button class="btn" onclick="showView('add-view')">➕ Dodaj Nowy Utwór</button>
+    
+    <input type="text" id="search-input" class="search-box" placeholder="🔍 Szukaj utworu lub tekstu..." oninput="filterSongs()">
+    
+    <!-- Panel ze spiskiem na najbliższe spotkanie -->
+    <div id="meeting-panel" class="meeting-section hidden">
+      <h2>📌 Na najbliższe spotkanie</h2>
+      <div id="meeting-songs-list"></div>
     </div>
 
-    <!-- EKRAN KATEGORII -->
-    <div id="view-categories" class="hidden">
-        <button class="btn btn-back" onclick="showHome()">← Powrót do menu</button>
-        <h2>Kategorie Pieśni</h2>
-        <div id="category-list" class="vertical-menu"></div>
-    </div>
+    <h3>Wszystkie Pieśni</h3>
+    <div id="songs-list">Ladowanie pieśni...</div>
+  </div>
 
-    <!-- EKRAN LISTY UTWORÓW -->
-    <div id="view-songs" class="hidden">
-        <button class="btn btn-back" onclick="showCategories()">← Powrót do kategorii</button>
-        <h2 id="selected-category-title"></h2>
-        <input type="text" id="search-input" placeholder="🔍 Szukaj pieśni..." oninput="filterSongs()">
-        <div id="song-list" class="vertical-menu"></div>
-    </div>
+  <!-- Formularz Dodawania / Edycji -->
+  <div id="add-view" class="hidden">
+    <button class="btn btn-secondary" onclick="showView('main-view')">← Anuluj</button>
+    <h2 id="form-title" style="color: var(--primary);">Dodaj Utwór</h2>
+    
+    <input type="hidden" id="song-id">
+    <input type="text" id="song-title" placeholder="Tytuł utworu *" required>
+    
+    <select id="song-category">
+      <option value="Uwielbienie">Uwielbienie</option>
+      <option value="Liturgiczne">Liturgiczne</option>
+      <option value="Oazowe">Oazowe</option>
+      <option value="Maryjne">Maryjne</option>
+      <option value="Inne">Inne</option>
+    </select>
 
-    <!-- EKRAN PIEŚNI -->
-    <div id="view-song-detail" class="hidden">
-        <button class="btn btn-back" onclick="showSongList()">← Powrót do listy</button>
-        <h2 id="detail-title"></h2>
-        
-        <div class="toolbar">
-            <button class="tool-btn" onclick="changeFontSize(1)">A+</button>
-            <button class="tool-btn" onclick="changeFontSize(-1)">A-</button>
-            
-            <div class="transpose-group">
-                <span class="transpose-label">Ton:</span>
-                <button class="tool-btn" onclick="transposeChords(-1)">-1</button>
-                <button class="tool-btn" onclick="transposeChords(1)">+1</button>
-            </div>
+    <textarea id="song-lyrics" rows="6" placeholder="Tekst pieśni *" required></textarea>
+    <textarea id="song-chords" rows="3" placeholder="Akordy / Chwyty (opcjonalnie)"></textarea>
+    
+    <input type="url" id="song-mp3" placeholder="Link do pliku MP3 / Audio (opcjonalnie)">
+    <input type="url" id="song-pdf" placeholder="Link do nut / dokumentu PDF (opcjonalnie)">
 
-            <button class="tool-btn" id="autoscroll-btn" onclick="toggleAutoscroll()">📜 Auto</button>
-            <button class="tool-btn" onclick="editCurrentSong()" style="border-color: var(--accent); color: var(--accent);">✏️ Edytuj</button>
-        </div>
-
-        <div id="media-container" class="media-section hidden">
-            <div id="audio-player-box" class="hidden">
-                <label>🔊 Nagranie (MP3):</label>
-                <audio id="audio-player" controls></audio>
-            </div>
-            <div id="pdf-viewer-box" class="hidden">
-                <label>📄 Nuty (PDF):</label>
-                <a id="pdf-download-link" target="_blank" class="tool-btn" style="display:inline-block; text-decoration:none; margin-bottom:8px;">Otwórz PDF</a>
-                <iframe id="pdf-frame"></iframe>
-            </div>
-        </div>
-
-        <div class="song-container">
-            <div id="detail-chords" class="song-chords hidden"></div>
-            <div id="detail-text" class="song-text"></div>
-        </div>
-    </div>
-
-    <!-- EKRAN DODAWANIA / EDYCJI UTWORU -->
-    <div id="view-add-form" class="hidden">
-        <button class="btn btn-back" onclick="showHome()">← Anuluj</button>
-        <h2 id="form-heading">Dodaj Utwór</h2>
-        <form id="song-form" onsubmit="saveSong(event)">
-            <input type="hidden" id="form-edit-id">
-            
-            <label>Tytuł utworu:</label>
-            <input type="text" id="form-title" placeholder="np. Oto są baranki młode" required>
-            
-            <label>Kategoria:</label>
-            <select id="form-category"></select>
-            
-            <label>Tekst pieśni:</label>
-            <textarea id="form-text" placeholder="Wpisz tekst pieśni..." rows="8" required></textarea>
-            
-            <label>Akordy (opcjonalnie):</label>
-            <textarea id="form-chords" placeholder="np. C G a F" rows="4"></textarea>
-            
-            <button type="submit" class="btn btn-accent" style="margin-top:16px;">Zapisz w chmurze</button>
-        </form>
-    </div>
+    <button class="btn" onclick="saveSong()">Zapisz w chmurze</button>
+  </div>
 </div>
 
 <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, getDocs, addDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyB47uVTsnS8QAxTyA45WWcdJXERQ_fWS8w",
-        authDomain: "spiewnik-psie-pole.firebaseapp.com",
-        projectId: "spiewnik-psie-pole",
-        storageBucket: "spiewnik-psie-pole.firebasestorage.app",
-        messagingSenderId: "230415496108",
-        appId: "1:230415496108:web:35afe501ce89ceb5ebc009",
-        measurementId: "G-PXK4KHZ4MR"
-    };
+  // Wklej tutaj swoją konfigurację Firebase jeśli uległa zmianie
+  const firebaseConfig = {
+    projectId: "spiewnik-psie-pole"
+  };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
 
-    const ADMIN_PIN = "1234";
-    const categories = ["Wszystko", "Wielki Post", "Adwent", "Boże Narodzenie", "Wielkanoc", "Duch Święty", "Medytacyjne", "Okres zwykły", "Maryjne", "Uwielbienie", "Eucharystyczne"];
+  let allSongs = [];
+  let meetingSongIds = JSON.parse(localStorage.getItem('meeting_songs') || '[]');
 
-    let songs = [];
-    let currentCategory = "";
-    let autoscrollInterval = null;
-    let currentFontSize = 16;
-    let currentSong = null;
-    let currentChordsWorkingCopy = "";
+  window.showView = function(viewId) {
+    document.getElementById('main-view').classList.add('hidden');
+    document.getElementById('add-view').classList.add('hidden');
+    document.getElementById(viewId).classList.remove('hidden');
+  }
 
-    const scale = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
-    const scaleFlats = ["C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"];
+  async function loadSongs() {
+    try {
+      const querySnapshot = await getDocs(collection(db, "songs"));
+      allSongs = [];
+      querySnapshot.forEach((doc) => {
+        allSongs.push({ id: doc.id, ...doc.data() });
+      });
+      renderSongs();
+    } catch (e) {
+      console.error("Błąd pobierania danych: ", e);
+      document.getElementById('songs-list').innerText = "Błąd ładowania danych z bazy.";
+    }
+  }
 
-    async function fetchSongsFromFirebase() {
-        try {
-            const querySnapshot = await getDocs(collection(db, "songs"));
-            songs = [];
-            querySnapshot.forEach((doc) => {
-                songs.push({ id: doc.id, ...doc.data() });
-            });
-            localStorage.setItem('cached_songs', JSON.stringify(songs));
-        } catch (e) {
-            console.log("Ładowanie z pamięci podręcznej (Offline)");
-            songs = JSON.parse(localStorage.getItem('cached_songs')) || [];
-        }
+  function renderSongs() {
+    const listContainer = document.getElementById('songs-list');
+    const meetingContainer = document.getElementById('meeting-songs-list');
+    const meetingPanel = document.getElementById('meeting-panel');
+
+    listContainer.innerHTML = '';
+    meetingContainer.innerHTML = '';
+
+    const meetingSongs = allSongs.filter(s => meetingSongIds.includes(s.id));
+
+    if (meetingSongs.length > 0) {
+      meetingPanel.classList.remove('hidden');
+      meetingSongs.forEach(song => {
+        meetingContainer.appendChild(createSongElement(song, true));
+      });
+    } else {
+      meetingPanel.classList.add('hidden');
     }
 
-    window.showHome = function() { hideAllViews(); document.getElementById('view-home').classList.remove('hidden'); };
+    if (allSongs.length === 0) {
+      listContainer.innerHTML = '<p>Brak utworów w bazie. Dodaj pierwszy utwór!</p>';
+      return;
+    }
+
+    allSongs.forEach(song => {
+      listContainer.appendChild(createSongElement(song, false));
+    });
+  }
+
+  function createSongElement(song, isMeetingList) {
+    const card = document.createElement('div');
+    card.className = 'song-card';
     
-    window.showCategories = function() {
-        hideAllViews();
-        const list = document.getElementById('category-list'); list.innerHTML = '';
-        categories.forEach(cat => {
-            const btn = document.createElement('button'); btn.className = 'btn'; 
-            if (cat === "Wszystko") {
-                btn.classList.add('btn-accent'); btn.innerText = "🔍 " + cat;
-            } else {
-                btn.innerText = cat;
-            }
-            btn.onclick = () => showSongsByCategory(cat); list.appendChild(btn);
-        });
-        document.getElementById('view-categories').classList.remove('hidden');
-    };
+    const isInMeeting = meetingSongIds.includes(song.id);
 
-    window.showSongsByCategory = function(cat) {
-        currentCategory = cat; hideAllViews();
-        document.getElementById('selected-category-title').innerText = cat === "Wszystko" ? "Wszystkie Utwory" : cat;
-        document.getElementById('search-input').value = '';
-        
-        const filtered = cat === "Wszystko" ? songs : songs.filter(s => s.category === cat);
-        renderSongList(filtered);
-        document.getElementById('view-songs').classList.remove('hidden');
-    };
+    card.innerHTML = `
+      <div class="song-header">
+        <div>
+          <span class="song-title">${song.title}</span>
+          <span class="song-category">${song.category || 'Ogólne'}</span>
+        </div>
+        <button class="btn-add-meeting" onclick="window.toggleMeeting('${song.id}')" title="Dodaj/Usuń ze spotkania">
+          ${isInMeeting ? '➖' : '➕'}
+        </button>
+      </div>
 
-    function renderSongList(arr) {
-        const list = document.getElementById('song-list'); list.innerHTML = '';
-        if (arr.length === 0) {
-            list.innerHTML = '<p style="text-align:center; color: var(--text-muted);">Brak utworów w tej kategorii.</p>';
-        } else {
-            arr.forEach(song => {
-                const btn = document.createElement('button'); btn.className = 'btn';
-                btn.innerText = song.title;
-                btn.onclick = () => openSongDetail(song); list.appendChild(btn);
-            });
-        }
+      <button class="btn btn-secondary btn-small" onclick="window.toggleChords('${song.id}')">🎸 Pokaż Akordy</button>
+      <div id="chords-${song.id}" class="chords">${song.chords || 'Brak akordów'}</div>
+
+      <div class="lyrics">${song.lyrics}</div>
+
+      <div class="media-links">
+        ${song.mp3 ? `<a href="${song.mp3}" target="_blank" class="media-btn">🎵 Posłuchaj MP3</a>` : ''}
+        ${song.pdf ? `<a href="${song.pdf}" target="_blank" class="media-btn">📄 Nuty / PDF</a>` : ''}
+      </div>
+    `;
+    return card;
+  }
+
+  window.toggleChords = function(id) {
+    const el = document.getElementById(`chords-${id}`);
+    if (el.style.display === 'block') {
+      el.style.display = 'none';
+    } else {
+      el.style.display = 'block';
+    }
+  };
+
+  window.toggleMeeting = function(id) {
+    if (meetingSongIds.includes(id)) {
+      meetingSongIds = meetingSongIds.filter(item => item !== id);
+    } else {
+      meetingSongIds.push(id);
+    }
+    localStorage.setItem('meeting_songs', JSON.stringify(meetingSongIds));
+    renderSongs();
+  };
+
+  window.filterSongs = function() {
+    const query = document.getElementById('search-input').value.toLowerCase();
+    const cards = document.querySelectorAll('#songs-list .song-card');
+    cards.forEach(card => {
+      const text = card.innerText.toLowerCase();
+      card.style.display = text.includes(query) ? 'block' : 'none';
+    });
+  };
+
+  window.saveSong = async function() {
+    const title = document.getElementById('song-title').value.trim();
+    const category = document.getElementById('song-category').value;
+    const lyrics = document.getElementById('song-lyrics').value.trim();
+    const chords = document.getElementById('song-chords').value.trim();
+    const mp3 = document.getElementById('song-mp3').value.trim();
+    const pdf = document.getElementById('song-pdf').value.trim();
+
+    if (!title || !lyrics) {
+      alert("Uzupełnij tytuł i tekst utworu!");
+      return;
     }
 
-    window.filterSongs = function() {
-        const query = document.getElementById('search-input').value.toLowerCase();
-        const baseList = currentCategory === "Wszystko" ? songs : songs.filter(s => s.category === currentCategory);
-        const filtered = baseList.filter(s => s.title.toLowerCase().includes(query) || s.text.toLowerCase().includes(query));
-        renderSongList(filtered);
-    };
-
-    function openSongDetail(song) {
-        hideAllViews();
-        currentSong = song;
-        currentChordsWorkingCopy = song.chords || '';
-
-        document.getElementById('detail-title').innerText = song.title;
-        document.getElementById('detail-text').innerText = song.text;
-        
-        const chordsDiv = document.getElementById('detail-chords');
-        chordsDiv.innerText = currentChordsWorkingCopy;
-        chordsDiv.classList.toggle('hidden', !currentChordsWorkingCopy);
-
-        document.getElementById('view-song-detail').classList.remove('hidden');
+    try {
+      await addDoc(collection(db, "songs"), {
+        title, category, lyrics, chords, mp3, pdf,
+        createdAt: new Date()
+      });
+      alert("Utwór zapisany pomyślnie!");
+      showView('main-view');
+      loadSongs();
+    } catch (e) {
+      alert("Błąd zapisu: " + e.message);
     }
+  };
 
-    function transposeSingleNote(note, semitones) {
-        let isMinor = false;
-        if (note.length > 1 && note.endsWith('m') && !note.endsWith('dim')) {
-            note = note.slice(0, -1); isMinor = true;
-        }
-        let index = scale.indexOf(note);
-        if (index === -1) index = scaleFlats.indexOf(note);
-        if (index === -1) return note + (isMinor ? 'm' : '');
-        let newIndex = (index + semitones) % 12;
-        if (newIndex < 0) newIndex += 12;
-        return scale[newIndex] + (isMinor ? 'm' : '');
-    }
-
-    window.transposeChords = function(semitones) {
-        if (!currentChordsWorkingCopy) return;
-        const lines = currentChordsWorkingCopy.split('\n');
-        const transposedLines = lines.map(line => {
-            return line.replace(/([A-G][#b]?m?(?:\/[A-G][#b]?)?)/g, match => {
-                if (match.includes('/')) {
-                    const parts = match.split('/');
-                    return transposeSingleNote(parts[0], semitones) + '/' + transposeSingleNote(parts[1], semitones);
-                }
-                return transposeSingleNote(match, semitones);
-            });
-        });
-        currentChordsWorkingCopy = transposedLines.join('\n');
-        document.getElementById('detail-chords').innerText = currentChordsWorkingCopy;
-    };
-
-    window.showSongList = function() { showSongsByCategory(currentCategory || "Wszystko"); };
-    window.changeFontSize = function(delta) {
-        currentFontSize += delta;
-        document.getElementById('detail-text').style.fontSize = currentFontSize + 'px';
-        document.getElementById('detail-chords').style.fontSize = currentFontSize + 'px';
-    };
-
-    window.toggleAutoscroll = function() {
-        if (autoscrollInterval) { stopAutoscroll(); }
-        else { 
-            autoscrollInterval = setInterval(() => window.scrollBy(0, 1), 60); 
-            document.getElementById('autoscroll-btn').innerText = '⏸ Stop';
-        }
-    };
-
-    function stopAutoscroll() {
-        clearInterval(autoscrollInterval);
-        autoscrollInterval = null;
-        document.getElementById('autoscroll-btn').innerText = '📜 Auto';
-    }
-
-    function hideAllViews() {
-        ['view-home', 'view-categories', 'view-songs', 'view-song-detail', 'view-add-form'].forEach(id => document.getElementById(id).classList.add('hidden'));
-        if (autoscrollInterval) stopAutoscroll();
-    }
-
-    window.showFormWithPin = function() {
-        const pin = prompt("Podaj PIN administratora:");
-        if (pin === ADMIN_PIN) showForm();
-        else if (pin !== null) alert("Nieprawidłowy PIN!");
-    };
-
-    function showForm(songToEdit = null) {
-        hideAllViews();
-        const sel = document.getElementById('form-category'); sel.innerHTML = '';
-        categories.filter(c => c !== "Wszystko").forEach(c => { 
-            const o = document.createElement('option'); o.value = c; o.innerText = c; sel.appendChild(o); 
-        });
-
-        if (songToEdit) {
-            document.getElementById('form-heading').innerText = "Edytuj Utwór";
-            document.getElementById('form-edit-id').value = songToEdit.id;
-            document.getElementById('form-title').value = songToEdit.title;
-            document.getElementById('form-category').value = songToEdit.category;
-            document.getElementById('form-text').value = songToEdit.text;
-            document.getElementById('form-chords').value = songToEdit.chords || '';
-        } else {
-            document.getElementById('form-heading').innerText = "Dodaj Nowy Utwór";
-            document.getElementById('form-edit-id').value = "";
-            document.getElementById('song-form').reset();
-        }
-        document.getElementById('view-add-form').classList.remove('hidden');
-    }
-
-    window.editCurrentSong = function() {
-        const pin = prompt("Podaj PIN administratora:");
-        if (pin === ADMIN_PIN) showForm(currentSong);
-        else if (pin !== null) alert("Nieprawidłowy PIN!");
-    };
-
-    window.saveSong = async function(e) {
-        e.preventDefault();
-        const editId = document.getElementById('form-edit-id').value;
-        const songData = {
-            title: document.getElementById('form-title').value,
-            category: document.getElementById('form-category').value,
-            text: document.getElementById('form-text').value,
-            chords: document.getElementById('form-chords').value
-        };
-
-        try {
-            if (editId) {
-                await updateDoc(doc(db, "songs", editId), songData);
-            } else {
-                await addDoc(collection(db, "songs"), songData);
-            }
-            alert('Utwór zapisany w chmurze!');
-            await fetchSongsFromFirebase();
-            showHome();
-        } catch (err) {
-            alert('Błąd podczas zapisu: ' + err.message);
-        }
-    };
-
-    // Rejestracja PWA Service Workera
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw.js');
-    }
-
-    // Inicjalizacja danych z bazy
-    fetchSongsFromFirebase();
+  // Start aplikacji
+  loadSongs();
 </script>
 </body>
 </html>
