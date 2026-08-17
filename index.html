@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pl">
 <head>
@@ -192,14 +193,16 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-  const firebaseConfig = { projectId: "spiewnik-psie-pole" };
-  let db = null;
+  const firebaseConfig = {
+    projectId: "spiewnik-psie-pole"
+  };
 
+  let db = null;
   try {
     const app = initializeApp(firebaseConfig);
     db = getFirestore(app);
-  } catch(e) {
-    console.warn("Tryb Offline:", e);
+  } catch (e) {
+    console.warn("Błąd inicjalizacji Firebase:", e);
   }
 
   let songs = JSON.parse(localStorage.getItem('spiewnik_songs') || '[]');
@@ -226,13 +229,15 @@
       const querySnapshot = await getDocs(collection(db, "songs"));
       if (!querySnapshot.empty) {
         const fetched = [];
-        querySnapshot.forEach((docSnap) => fetched.push({ id: docSnap.id, ...docSnap.data() }));
+        querySnapshot.forEach((docSnap) => {
+          fetched.push({ id: docSnap.id, ...docSnap.data() });
+        });
         songs = fetched;
         localStorage.setItem('spiewnik_songs', JSON.stringify(songs));
         renderAll();
       }
-    } catch(e) {
-      console.log("Błąd pobierania z Firebase, korzystam z pamięci lokalnej.");
+    } catch (e) {
+      console.log("Błąd pobierania z Firebase (działam lokalnie):", e);
     }
   }
 
@@ -521,7 +526,7 @@
           const docRef = await addDoc(collection(db, "songs"), songData);
           songData.id = docRef.id;
         }
-      } catch(e) {
+      } catch (e) {
         console.error("Błąd zapisu w chmurze:", e);
       }
     }
@@ -545,4 +550,19 @@
 
     if (db) {
       try { await deleteDoc(doc(db, "songs", id)); } catch(e){}
- 
+    }
+
+    songs = songs.filter(s => s.id !== id);
+    repertuarIds = repertuarIds.filter(i => i !== id);
+    localStorage.setItem('spiewnik_songs', JSON.stringify(songs));
+    localStorage.setItem('spiewnik_repertuar', JSON.stringify(repertuarIds));
+    renderAll();
+    showView('view-home');
+  };
+
+  renderAll();
+  fetchFromFirebase();
+</script>
+
+</body>
+</html>
