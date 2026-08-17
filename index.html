@@ -70,6 +70,7 @@
       color: var(--text); border-radius: 8px; font-size: 1rem;
     }
     textarea.input-field { height: 120px; resize: vertical; }
+    textarea#form-bulk-text { height: 220px; font-family: monospace; font-size: 0.9rem; }
 
     .nav-bar { display: flex; justify-content: space-between; margin-bottom: 15px; }
 
@@ -102,6 +103,7 @@
     <button class="btn btn-filled" onclick="showView('view-archive')">📁 Archiwum Repertuarów</button>
     <button class="btn btn-filled" onclick="showView('view-songs')">📖 Przeglądaj Śpiewnik</button>
     <button class="btn" onclick="openAddForm()">➕ Dodaj Utwór 🔒</button>
+    <button class="btn" onclick="openBulkForm()">📥 Dodaj masowo 🔒</button>
   </div>
 
   <!-- WIDOK PRZEGLĄDANIA ŚPIEWNIKA -->
@@ -151,7 +153,7 @@
     <h2 id="view-title"></h2>
     <span id="view-category" style="color: var(--primary); font-size: 0.9rem;"></span>
 
-    <!-- PRZYCISK OTWIERAJĄCY NAGRANIE (ZAMIAST SZAREGO ODTWARZACZA) -->
+    <!-- PRZYCISK OTWIERAJĄCY NAGRANIE -->
     <div id="view-audio-container" class="hidden" style="margin-top: 15px;">
       <a id="view-audio-btn" href="#" target="_blank" class="btn btn-filled" style="background-color: #2a9d8f; border-color: #2a9d8f; color: #fff; margin-bottom: 0;">
         🎵 Włącz nagranie audio
@@ -171,7 +173,7 @@
     <div id="view-lyrics" class="song-lyrics"></div>
   </div>
 
-  <!-- WIDOK DODAWANIA / EDYCJI -->
+  <!-- WIDOK DODAWANIA / EDYCJI POJEDYNCZEGO -->
   <div id="view-form" class="hidden">
     <div class="nav-bar">
       <button class="btn btn-secondary btn-small" onclick="showView('view-home')">⬅️ Anuluj</button>
@@ -187,6 +189,26 @@
 
     <button class="btn btn-filled" onclick="saveSong()">💾 Zapisz</button>
     <button class="btn btn-danger hidden" id="btn-delete" onclick="deleteCurrentSong()">🗑️ Usuń Utwór</button>
+  </div>
+
+  <!-- WIDOK DODAWANIA MASOWEGO -->
+  <div id="view-bulk" class="hidden">
+    <div class="nav-bar">
+      <button class="btn btn-secondary btn-small" onclick="showView('view-home')">⬅️ Anuluj</button>
+      <h2>Masowe dodawanie</h2>
+    </div>
+
+    <p style="font-size: 0.85rem; color: var(--text-sub); margin-bottom: 10px;">
+      Szablon:<br>
+      <code style="color: var(--primary);">=== Tytuł (Kategoria) ===</code><br>
+      <code style="color: var(--primary);">[tekst]</code> Treść...<br>
+      <code style="color: var(--primary);">[akordy]</code> C G a F<br>
+      <code style="color: var(--primary);">[audio]</code> Link URL
+    </p>
+
+    <textarea id="form-bulk-text" class="input-field" placeholder="Wklej tutaj pieśni według szablonu..."></textarea>
+
+    <button class="btn btn-filled" onclick="processBulkImport()">📥 Importuj wszystko</button>
   </div>
 
 </div>
@@ -375,7 +397,6 @@
     chordsEl.innerText = song.chords || 'Brak akordów.';
     chordsEl.style.display = 'none';
 
-    // OBSŁUGA PRZYCISKU AUDIO
     const audioContainer = document.getElementById('view-audio-container');
     const audioBtn = document.getElementById('view-audio-btn');
     
@@ -492,6 +513,12 @@
     showView('view-form');
   };
 
+  window.openBulkForm = function() {
+    if (!checkAdminAccess()) return;
+    document.getElementById('form-bulk-text').value = "";
+    showView('view-bulk');
+  };
+
   window.editCurrentSong = function() {
     if (!checkAdminAccess()) return;
 
@@ -549,6 +576,78 @@
       openSong(id);
     } else {
       showView('view-home');
+    }
+  };
+
+  window.processBulkImport = async function() {
+    const rawText = document.getElementById('form-bulk-text').value.trim();
+    if (!rawText) return alert("Wklej dane do importu!");
+
+    // Dzielenie po nagłówkach === Tytuł (Kategoria) ===
+    const blocks = rawText.split(/(?====\s)/);
+    let addedCount = 0;
+
+    for (let block of blocks) {
+      block = block.trim();
+      if (!block) continue;
+
+      const lines = block.split('\n');
+      const headerLine = lines[0].trim();
+      
+      const match = headerLine.match(/^===\s*(.*?)(?:\s*\((.*?)\))?\s*===$/);
+      if (!match) continue;
+
+      const title = match[1].trim();
+      const category = match[2] ? match[2].trim() : "Uwielbienie";
+
+      let body = lines.slice(1).join('\n');
+
+      let lyrics = "";
+      let chords = "";
+      let audioUrl = "";
+
+      const parts = body.split(/(?=\[(?:tekst|akordy|audio)\])/i);
+      for (let part of parts) {
+        part = part.trim();
+        if (part.toLowerCase().startsWith('[tekst]')) {
+          lyrics = part.replace(/^\[tekst\]\s*/i, '').trim();
+        } else if (part.toLowerCase().startsWith('[akordy]')) {
+          chords = part.replace(/^\[akordy\]\s*/i, '').trim();
+        } else if (part.toLowerCase().startsWith('[audio]')) {
+          audioUrl = part.replace(/^\[audio\]\s*/i, '').trim();
+        }
+      }
+
+      if (!lyrics && body && !body.includes('[')) {
+        lyrics = body.trim();
+      }
+
+      if (title && lyrics) {
+        const songData = { title, category, audioUrl, lyrics, chords };
+        
+        if (db) {
+          try {
+            const docRef = await addDoc(collection(db, "songs"), songData);
+            songData.id = docRef.id;
+          } catch(e) {
+            songData.id = (Date.now() + Math.random()).toString();
+          }
+        } else {
+          songData.id = (Date.now() + Math.random()).toString();
+        }
+
+        songs.push(songData);
+        addedCount++;
+      }
+    }
+
+    if (addedCount > 0) {
+      localStorage.setItem('spiewnik_songs', JSON.stringify(songs));
+      renderAll();
+      alert(`Pomyślnie zaimportowano ${addedCount} utworów!`);
+      showView('view-home');
+    } else {
+      alert("Nie udało się sparsować żadnego utworu. Sprawdź poprawność szablonu.");
     }
   };
 
