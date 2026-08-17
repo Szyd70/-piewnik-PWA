@@ -236,7 +236,7 @@
     }
 
     .hidden {
-      display: none;
+      display: none !important;
     }
   </style>
 </head>
@@ -283,9 +283,7 @@
     
     <input type="text" id="search-input" class="search-box" placeholder="🔍 Szukaj utworu..." oninput="filterSongs()">
     
-    <!-- PODZIAŁ NA KATEGORIE -->
     <div id="categories-bar" class="categories-bar"></div>
-
     <div id="all-songs-list">Ładowanie pieśni...</div>
   </div>
 
@@ -295,7 +293,6 @@
     <h2 id="view-song-title" style="color: var(--primary); margin-bottom: 4px;"></h2>
     <span id="view-song-category" class="song-category" style="margin-left: 0;"></span>
     
-    <!-- PANEL NARZĘDZIOWY (TRANSPOZYCJA + CZCIONKA + EDYCJA) -->
     <div class="toolbar">
       <button class="btn btn-secondary btn-small" onclick="toggleChords()">🎸 Akordy</button>
       <button class="btn btn-secondary btn-small" onclick="transpose(-1)">♭ -1</button>
@@ -306,7 +303,6 @@
       <span style="color: var(--text-sub); font-size: 0.8rem; margin: 0 4px;">|</span>
       <button class="btn btn-secondary btn-small" onclick="editCurrentSong()">✏️ Edytuj</button>
       
-      <!-- AUTOMATYCZNE PRZEWIJANIE -->
       <div class="scroll-control">
         <button id="btn-scroll" class="btn btn-small" style="margin: 0;" onclick="toggleAutoScroll()">📜 Start Auto</button>
         <span style="font-size: 0.8rem; color: var(--text-sub);">Prędkość:</span>
@@ -374,7 +370,10 @@
   window.showView = function(viewId) {
     stopAutoScroll();
     document.querySelectorAll('.container > div').forEach(div => div.classList.add('hidden'));
-    document.getElementById(viewId).classList.remove('hidden');
+    const target = document.getElementById(viewId);
+    if (target) {
+      target.classList.remove('hidden');
+    }
   };
 
   async function loadSongs() {
@@ -394,7 +393,7 @@
       renderAll();
     } catch (e) {
       console.error("Błąd Firebase: ", e);
-      document.getElementById('all-songs-list').innerText = "Błąd pobierania danych.";
+      document.getElementById('all-songs-list').innerText = "Błąd pobierania danych z bazy.";
     }
   }
 
@@ -418,6 +417,7 @@
 
   function renderCategoryChips() {
     const container = document.getElementById('categories-bar');
+    if (!container) return;
     container.innerHTML = '';
 
     const categories = ['Wszystkie', ...getUniqueCategories()];
@@ -437,6 +437,7 @@
 
   function renderDatalist() {
     const datalist = document.getElementById('categories-datalist');
+    if (!datalist) return;
     datalist.innerHTML = '';
     getUniqueCategories().forEach(cat => {
       const opt = document.createElement('option');
@@ -447,6 +448,7 @@
 
   function renderSongsList() {
     const container = document.getElementById('all-songs-list');
+    if (!container) return;
     container.innerHTML = '';
 
     let filtered = allSongs;
@@ -466,6 +468,7 @@
 
   function renderRepertuar() {
     const container = document.getElementById('repertuar-list');
+    if (!container) return;
     container.innerHTML = '';
 
     const repertuarSongs = allSongs.filter(s => repertuarIds.includes(s.id));
@@ -482,6 +485,7 @@
 
   function renderArchives() {
     const container = document.getElementById('archive-list');
+    if (!container) return;
     container.innerHTML = '';
 
     if (archivedRepertuars.length === 0) {
@@ -495,7 +499,7 @@
       div.innerHTML = `
         <div>
           <strong style="color: var(--primary); font-size: 1rem;">${arch.name}</strong>
-          <div style="font-size: 0.8rem; color: var(--text-sub);">Liczba pieśni: ${arch.songIds.length}</div>
+          <div style="font-size: 0.8rem; color: var(--text-sub);">Liczba pieśni: ${arch.songIds ? arch.songIds.length : 0}</div>
         </div>
         <div>
           <button class="btn btn-secondary btn-small" onclick="loadArchiveToRepertuar('${arch.id}')">📂 Wczytaj</button>
@@ -548,11 +552,11 @@
     if (song.mp3) mediaContainer.innerHTML += `<a href="${song.mp3}" download="${song.title}.mp3" target="_blank" class="media-btn">🎵 Pobierz / Otwórz MP3</a>`;
     if (song.pdf) mediaContainer.innerHTML += `<a href="${song.pdf}" download="${song.title}.pdf" target="_blank" class="media-btn">📄 Otwórz Nuty / PDF</a>`;
 
-    showView('single-song-view');
+    window.showView('single-song-view');
   };
 
   window.goBackFromSong = function() {
-    showView(previousView);
+    window.showView(previousView);
   };
 
   window.toggleChords = function() {
@@ -596,8 +600,10 @@
   function startAutoScroll() {
     isScrolling = true;
     const btn = document.getElementById('btn-scroll');
-    btn.innerText = "⏸️ Stop";
-    btn.style.backgroundColor = "var(--accent)";
+    if (btn) {
+      btn.innerText = "⏸️ Stop";
+      btn.style.backgroundColor = "var(--accent)";
+    }
 
     scrollInterval = setInterval(() => {
       const speed = parseInt(document.getElementById('scroll-speed').value, 10);
@@ -625,9 +631,4 @@
     } else {
       repertuarIds.push(id);
     }
-    localStorage.setItem('repertuar_songs', JSON.stringify(repertuarIds));
-    renderAll();
-  };
-
-  window.saveRepertuarToArchive = async function() {
- 
+    localStorage.setItem(
