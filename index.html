@@ -48,7 +48,7 @@
 
     .hero-img {
       width: 100%;
-      height: 200px;
+      height: 180px;
       object-fit: cover;
       border-radius: 12px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.5);
@@ -80,11 +80,17 @@
       border: 2px solid var(--primary);
     }
 
+    .btn-danger {
+      background-color: transparent;
+      color: var(--danger);
+      border: 2px solid var(--danger);
+    }
+
     .btn-small {
       width: auto;
       padding: 8px 14px;
       font-size: 0.85rem;
-      margin: 8px 0;
+      margin: 4px 4px 4px 0;
     }
 
     .btn-add-repertuar {
@@ -99,6 +105,32 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .categories-bar {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      margin-bottom: 12px;
+    }
+
+    .cat-chip {
+      background-color: #334155;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 16px;
+      font-size: 0.85rem;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+
+    .cat-chip.active {
+      background-color: var(--primary);
+      color: #000;
+      font-weight: bold;
     }
 
     .search-box, select, input, textarea {
@@ -148,7 +180,7 @@
     .chords {
       background-color: #0f172a;
       color: var(--accent);
-      padding: 10px;
+      padding: 12px;
       border-radius: 6px;
       font-family: monospace;
       white-space: pre-wrap;
@@ -160,7 +192,7 @@
       white-space: pre-wrap;
       line-height: 1.6;
       font-size: 1.05rem;
-      margin-top: 12px;
+      margin-top: 16px;
     }
 
     .media-links {
@@ -196,20 +228,32 @@
   <div id="home-view">
     <button class="btn" onclick="showView('repertuar-view')">📌 Repertuar</button>
     <button class="btn" onclick="showView('songs-list-view')">📖 Przeglądaj Śpiewnik</button>
-    <button class="btn btn-secondary" onclick="showView('add-view')">➕ Dodaj Nowy Utwór</button>
+    <button class="btn btn-secondary" onclick="openAddForm()">➕ Dodaj Utwór</button>
   </div>
 
   <!-- REPERTUAR -->
   <div id="repertuar-view" class="hidden">
-    <button class="btn btn-secondary" onclick="showView('home-view')">← Menu Głównie</button>
+    <button class="btn btn-secondary" onclick="showView('home-view')">← Menu Główny</button>
     <h2 style="color: var(--accent);">📌 Repertuar</h2>
     <div id="repertuar-list">Brak utworów w repertuarze.</div>
   </div>
 
   <!-- LISTA WSZYSTKICH PIEŚNI -->
   <div id="songs-list-view" class="hidden">
-    <button class="btn btn-secondary" onclick="showView('home-view')">← Menu Głównie</button>
+    <button class="btn btn-secondary" onclick="showView('home-view')">← Menu Główny</button>
+    
     <input type="text" id="search-input" class="search-box" placeholder="🔍 Szukaj utworu..." oninput="filterSongs()">
+    
+    <!-- PODZIAŁ NA KATEGORIE -->
+    <div class="categories-bar">
+      <button class="cat-chip active" onclick="filterCategory('Wszystkie', this)">Wszystkie</button>
+      <button class="cat-chip" onclick="filterCategory('Uwielbienie', this)">Uwielbienie</button>
+      <button class="cat-chip" onclick="filterCategory('Liturgiczne', this)">Liturgiczne</button>
+      <button class="cat-chip" onclick="filterCategory('Oazowe', this)">Oazowe</button>
+      <button class="cat-chip" onclick="filterCategory('Maryjne', this)">Maryjne</button>
+      <button class="cat-chip" onclick="filterCategory('Inne', this)">Inne</button>
+    </div>
+
     <div id="all-songs-list">Ładowanie pieśni...</div>
   </div>
 
@@ -221,19 +265,20 @@
     
     <div style="margin-top: 12px;">
       <button class="btn btn-secondary btn-small" onclick="toggleChords()">🎸 Pokaż / Ukryj Akordy</button>
+      <button class="btn btn-secondary btn-small" onclick="editCurrentSong()">✏️ Edytuj</button>
     </div>
+    
     <div id="view-song-chords" class="chords"></div>
-
     <div id="view-song-lyrics" class="lyrics"></div>
-
     <div id="view-song-media" class="media-links"></div>
   </div>
 
-  <!-- FORMULARZ DODAWANIA -->
+  <!-- FORMULARZ DODAWANIA / EDYCJI -->
   <div id="add-view" class="hidden">
     <button class="btn btn-secondary" onclick="showView('home-view')">← Anuluj</button>
-    <h2 style="color: var(--primary);">Dodaj Utwór</h2>
+    <h2 id="form-title" style="color: var(--primary);">Dodaj Utwór</h2>
     
+    <input type="hidden" id="song-id">
     <input type="text" id="song-title" placeholder="Tytuł utworu *" required>
     
     <select id="song-category">
@@ -244,19 +289,20 @@
       <option value="Inne">Inne</option>
     </select>
 
-    <textarea id="song-lyrics" rows="6" placeholder="Tekst pieśni *" required></textarea>
+    <textarea id="song-lyrics" rows="8" placeholder="Tekst pieśni *" required></textarea>
     <textarea id="song-chords" rows="3" placeholder="Akordy / Chwyty (opcjonalnie)"></textarea>
     
     <input type="url" id="song-mp3" placeholder="Link do pliku MP3 / Audio (opcjonalnie)">
     <input type="url" id="song-pdf" placeholder="Link do nut / PDF (opcjonalnie)">
 
     <button class="btn" onclick="saveSong()">Zapisz w chmurze</button>
+    <button id="btn-delete-song" class="btn btn-danger hidden" onclick="deleteCurrentSong()">🗑️ Usuń Utwór</button>
   </div>
 </div>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
   const firebaseConfig = { projectId: "spiewnik-psie-pole" };
   const app = initializeApp(firebaseConfig);
@@ -265,6 +311,10 @@
   let allSongs = [];
   let repertuarIds = JSON.parse(localStorage.getItem('repertuar_songs') || '[]');
   let previousView = 'home-view';
+  let currentSongId = null;
+  let activeCategory = 'Wszystkie';
+
+  const ADMIN_PIN = "1234";
 
   window.showView = function(viewId) {
     document.querySelectorAll('.container > div').forEach(div => div.classList.add('hidden'));
@@ -275,13 +325,13 @@
     try {
       const querySnapshot = await getDocs(collection(db, "songs"));
       allSongs = [];
-      querySnapshot.forEach((doc) => {
-        allSongs.push({ id: doc.id, ...doc.data() });
+      querySnapshot.forEach((d) => {
+        allSongs.push({ id: d.id, ...d.data() });
       });
       renderAll();
     } catch (e) {
       console.error("Błąd Firebase: ", e);
-      document.getElementById('all-songs-list').innerText = "Błąd pobierania pieśni z bazy.";
+      document.getElementById('all-songs-list').innerText = "Błąd pobierania danych.";
     }
   }
 
@@ -294,12 +344,17 @@
     const container = document.getElementById('all-songs-list');
     container.innerHTML = '';
 
-    if (allSongs.length === 0) {
-      container.innerHTML = '<p>Brak utworów w bazie.</p>';
+    let filtered = allSongs;
+    if (activeCategory !== 'Wszystkie') {
+      filtered = allSongs.filter(s => s.category === activeCategory);
+    }
+
+    if (filtered.length === 0) {
+      container.innerHTML = '<p style="color: var(--text-sub);">Brak utworów w tej kategorii.</p>';
       return;
     }
 
-    allSongs.forEach(song => {
+    filtered.forEach(song => {
       container.appendChild(createSongRow(song));
     });
   }
@@ -311,7 +366,7 @@
     const repertuarSongs = allSongs.filter(s => repertuarIds.includes(s.id));
 
     if (repertuarSongs.length === 0) {
-      container.innerHTML = '<p>Repertuar jest pusty. Dodaj pieśni za pomocą plusika (+).</p>';
+      container.innerHTML = '<p style="color: var(--text-sub);">Repertuar jest pusty. Dodaj pieśni za pomocą plusika (+).</p>';
       return;
     }
 
@@ -323,7 +378,6 @@
   function createSongRow(song) {
     const div = document.createElement('div');
     div.className = 'song-item';
-
     const isInRepertuar = repertuarIds.includes(song.id);
 
     div.innerHTML = `
@@ -341,6 +395,7 @@
     const song = allSongs.find(s => s.id === id);
     if (!song) return;
 
+    currentSongId = id;
     if (!document.getElementById('songs-list-view').classList.contains('hidden')) {
       previousView = 'songs-list-view';
     } else if (!document.getElementById('repertuar-view').classList.contains('hidden')) {
@@ -351,16 +406,18 @@
 
     document.getElementById('view-song-title').innerText = song.title;
     document.getElementById('view-song-category').innerText = song.category || 'Ogólne';
-    document.getElementById('view-song-lyrics').innerText = song.lyrics;
+    
+    // Zabezpieczenie przed inną nazwą zmiennej tekstu w bazie
+    document.getElementById('view-song-lyrics').innerText = song.lyrics || song.text || 'Brak tekstu.';
     
     const chordsEl = document.getElementById('view-song-chords');
-    chordsEl.innerText = song.chords || 'Brak akordów dla tego utworu.';
+    chordsEl.innerText = song.chords || 'Brak akordów.';
     chordsEl.style.display = 'none';
 
     const mediaContainer = document.getElementById('view-song-media');
     mediaContainer.innerHTML = '';
-    if (song.mp3) mediaContainer.innerHTML += `<a href="${song.mp3}" target="_blank" class="media-btn">🎵 Posłuchaj MP3</a>`;
-    if (song.pdf) mediaContainer.innerHTML += `<a href="${song.pdf}" target="_blank" class="media-btn">📄 Nuty / PDF</a>`;
+    if (song.mp3) mediaContainer.innerHTML += `<a href="${song.mp3}" target="_blank" class="media-btn">🎵 MP3</a>`;
+    if (song.pdf) mediaContainer.innerHTML += `<a href="${song.pdf}" target="_blank" class="media-btn">📄 Nuty PDF</a>`;
 
     showView('single-song-view');
   };
@@ -384,6 +441,13 @@
     renderAll();
   };
 
+  window.filterCategory = function(cat, btn) {
+    activeCategory = cat;
+    document.querySelectorAll('.cat-chip').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    renderSongsList();
+  };
+
   window.filterSongs = function() {
     const query = document.getElementById('search-input').value.toLowerCase();
     const rows = document.querySelectorAll('#all-songs-list .song-item');
@@ -392,7 +456,43 @@
     });
   };
 
+  window.openAddForm = function() {
+    document.getElementById('form-title').innerText = "Dodaj Utwór";
+    document.getElementById('song-id').value = "";
+    document.getElementById('song-title').value = "";
+    document.getElementById('song-lyrics').value = "";
+    document.getElementById('song-chords').value = "";
+    document.getElementById('song-mp3').value = "";
+    document.getElementById('song-pdf').value = "";
+    document.getElementById('btn-delete-song').classList.add('hidden');
+    showView('add-view');
+  };
+
+  window.editCurrentSong = function() {
+    const pin = prompt("Wpisz PIN administratora:");
+    if (pin !== ADMIN_PIN) {
+      alert("Niepoprawny PIN!");
+      return;
+    }
+
+    const song = allSongs.find(s => s.id === currentSongId);
+    if (!song) return;
+
+    document.getElementById('form-title').innerText = "Edytuj Utwór";
+    document.getElementById('song-id').value = song.id;
+    document.getElementById('song-title').value = song.title;
+    document.getElementById('song-category').value = song.category || "Uwielbienie";
+    document.getElementById('song-lyrics').value = song.lyrics || song.text || "";
+    document.getElementById('song-chords').value = song.chords || "";
+    document.getElementById('song-mp3').value = song.mp3 || "";
+    document.getElementById('song-pdf').value = song.pdf || "";
+    
+    document.getElementById('btn-delete-song').classList.remove('hidden');
+    showView('add-view');
+  };
+
   window.saveSong = async function() {
+    const id = document.getElementById('song-id').value;
     const title = document.getElementById('song-title').value.trim();
     const category = document.getElementById('song-category').value;
     const lyrics = document.getElementById('song-lyrics').value.trim();
@@ -406,21 +506,33 @@
     }
 
     try {
-      await addDoc(collection(db, "songs"), {
-        title, category, lyrics, chords, mp3, pdf,
-        createdAt: new Date()
-      });
-      alert("Utwór został pomyślnie zapisany!");
-      document.getElementById('song-title').value = '';
-      document.getElementById('song-lyrics').value = '';
-      document.getElementById('song-chords').value = '';
-      document.getElementById('song-mp3').value = '';
-      document.getElementById('song-pdf').value = '';
-      
+      if (id) {
+        await updateDoc(doc(db, "songs", id), { title, category, lyrics, chords, mp3, pdf });
+        alert("Zaktualizowano utwór!");
+      } else {
+        await addDoc(collection(db, "songs"), { title, category, lyrics, chords, mp3, pdf, createdAt: new Date() });
+        alert("Dodano nowy utwór!");
+      }
       showView('home-view');
       loadSongs();
     } catch (e) {
       alert("Błąd zapisu: " + e.message);
+    }
+  };
+
+  window.deleteCurrentSong = async function() {
+    const id = document.getElementById('song-id').value;
+    if (!id) return;
+
+    if (confirm("Czy na pewno chcesz usunąć ten utwór z bazy?")) {
+      try {
+        await deleteDoc(doc(db, "songs", id));
+        alert("Usunięto utwór.");
+        showView('home-view');
+        loadSongs();
+      } catch (e) {
+        alert("Błąd usuwania: " + e.message);
+      }
     }
   };
 
