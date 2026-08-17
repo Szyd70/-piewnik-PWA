@@ -106,7 +106,7 @@
     <button class="btn btn-filled" onclick="window.showView('view-repertuar')">📌 Repertuar</button>
     <button class="btn btn-filled" onclick="window.showView('view-archive')">📁 Archiwum Repertuarów</button>
     <button class="btn btn-filled" onclick="window.showView('view-songs')">📖 Przeglądaj Śpiewnik</button>
-    <button class="btn" onclick="window.openAddForm()">➕ Dodaj Utwór 🔒</button>
+    <button class="btn" onclick="window.openAddForm()">➕ Dodaj Utwór</button>
   </div>
 
   <!-- WIDOK PRZEGLĄDANIA ŚPIEWNIKA -->
@@ -150,7 +150,7 @@
   <div id="view-single" class="hidden">
     <div class="nav-bar">
       <button class="btn btn-secondary btn-small" onclick="window.goBackFromSong()">⬅️ Powrót</button>
-      <button class="btn btn-secondary btn-small" onclick="window.editCurrentSong()">✏️ Edytuj 🔒</button>
+      <button class="btn btn-secondary btn-small" onclick="window.editCurrentSong()">✏️ Edytuj</button>
     </div>
 
     <h2 id="view-title"></h2>
@@ -227,21 +227,7 @@
   let scrollInterval = null;
   let isScrolling = false;
 
-  const ADMIN_PIN = "1234";
-
   const chromaticScale = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
-
-  function checkAdminAccess() {
-    const pin = prompt("Wprowadź kod PIN, aby uzyskać dostęp do edycji/dodawania:");
-    if (pin === ADMIN_PIN) {
-      return true;
-    } else {
-      if (pin !== null) {
-        alert("Błędny kod PIN!");
-      }
-      return false;
-    }
-  }
 
   async function fetchFromFirebase() {
     if (!db) return;
@@ -398,6 +384,7 @@
     if (song.audioUrl && song.audioUrl.trim() !== '') {
       let rawUrl = song.audioUrl.trim();
       
+      // Przekształcanie linku z Dysku Google do bezpośredniego strumienia MP3
       if (rawUrl.includes('drive.google.com')) {
         const match = rawUrl.match(/\/d\/([^\/]+)/) || rawUrl.match(/id=([^&]+)/);
         if (match && match[1]) {
@@ -512,8 +499,6 @@
   };
 
   window.openAddForm = function() {
-    if (!checkAdminAccess()) return;
-
     document.getElementById('form-header').innerText = "Dodaj Utwór";
     document.getElementById('form-id').value = "";
     document.getElementById('form-title').value = "";
@@ -526,8 +511,6 @@
   };
 
   window.editCurrentSong = function() {
-    if (!checkAdminAccess()) return;
-
     const song = songs.find(s => s.id === currentSongId);
     if (!song) return;
 
@@ -536,4 +519,11 @@
     document.getElementById('form-title').value = song.title;
     document.getElementById('form-category').value = song.category || "";
     document.getElementById('form-audio-url').value = song.audioUrl || "";
-    document.getEl
+    document.getElementById('form-lyrics').value = song.lyrics || song.text || "";
+    document.getElementById('form-chords').value = song.chords || "";
+    document.getElementById('btn-delete').classList.remove('hidden');
+    window.showView('view-form');
+  };
+
+  window.saveSong = async function() {
+    const id = document.g
