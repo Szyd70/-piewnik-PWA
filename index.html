@@ -88,9 +88,10 @@
     }
     .controls-panel { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 15px; }
     
-    audio { width: 100%; margin-top: 15px; border-radius: 8px; }
+    audio { width: 100%; margin-top: 10px; border-radius: 8px; }
     .audio-section { margin-top: 5px; margin-bottom: 5px; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px; }
     .audio-section label { display: block; margin-bottom: 5px; font-size: 0.9rem; color: var(--primary); }
+    .audio-hint { font-size: 0.75rem; color: var(--text-sub); margin-top: 4px; display: block; }
   </style>
 </head>
 <body>
@@ -105,18 +106,7 @@
     <button class="btn btn-filled" onclick="window.showView('view-repertuar')">📌 Repertuar</button>
     <button class="btn btn-filled" onclick="window.showView('view-archive')">📁 Archiwum Repertuarów</button>
     <button class="btn btn-filled" onclick="window.showView('view-songs')">📖 Przeglądaj Śpiewnik</button>
-    <button class="btn" onclick="window.requestPinForAdd()">➕ Dodaj Utwór</button>
-  </div>
-
-  <!-- WIDOK PIN-U -->
-  <div id="view-pin" class="hidden">
-    <div class="nav-bar">
-      <button class="btn btn-secondary btn-small" onclick="window.showView('view-home')">⬅️ Anuluj</button>
-      <h2>Autoryzacja</h2>
-    </div>
-    <p style="color: var(--text-sub); margin-bottom: 15px; text-align: center;">Wprowadź PIN administratora, aby edytować lub dodać utwór:</p>
-    <input type="password" id="pin-input" class="input-field" placeholder="Wpisz PIN" style="text-align: center; letter-spacing: 4px; font-size: 1.5rem;">
-    <button class="btn btn-filled" onclick="window.verifyPin()">🔓 Potwierdź PIN</button>
+    <button class="btn" onclick="window.openAddForm()">➕ Dodaj Utwór 🔒</button>
   </div>
 
   <!-- WIDOK PRZEGLĄDANIA ŚPIEWNIKA -->
@@ -160,7 +150,7 @@
   <div id="view-single" class="hidden">
     <div class="nav-bar">
       <button class="btn btn-secondary btn-small" onclick="window.goBackFromSong()">⬅️ Powrót</button>
-      <button class="btn btn-secondary btn-small" onclick="window.requestPinForEdit()">✏️ Edytuj</button>
+      <button class="btn btn-secondary btn-small" onclick="window.editCurrentSong()">✏️ Edytuj 🔒</button>
     </div>
 
     <h2 id="view-title"></h2>
@@ -168,7 +158,7 @@
 
     <!-- ODTWARZACZ AUDIO -->
     <div id="view-audio-container" class="hidden">
-      <audio id="view-audio-player" controls>
+      <audio id="view-audio-player" controls preload="metadata">
         Twoja przeglądarka nie wspiera odtwarzacza audio.
       </audio>
     </div>
@@ -198,8 +188,9 @@
     <input type="text" id="form-category" class="input-field" placeholder="Kategoria (np. Uwielbienie, Kolędy)">
     
     <div class="audio-section">
-      <label for="form-audio-url">🎵 Link do pliku MP3 / Nagrania:</label>
-      <input type="text" id="form-audio-url" class="input-field" placeholder="https://..." style="margin-bottom:0;">
+      <label for="form-audio-url">🎵 Link do nagrania (MP3 / Dysk Google):</label>
+      <input type="text" id="form-audio-url" class="input-field" placeholder="https://drive.google.com/..." style="margin-bottom:0;">
+      <span class="audio-hint">Upewnij się, że plik na Dysku Google ma dostęp: "Każdy mający link".</span>
     </div>
 
     <textarea id="form-lyrics" class="input-field" placeholder="Tekst pieśni *" style="margin-top: 12px;"></textarea>
@@ -217,8 +208,6 @@
   import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
   const firebaseConfig = { projectId: "spiewnik-psie-pole" };
-  const ADMIN_PIN = "1234"; // Tutaj możesz zmienić swój PIN administratora
-  let pendingPinAction = null; // Zapamiętuje co użytkownik chciał zrobić po wpisaniu PINu ('add' lub 'edit')
   let db = null;
 
   try {
@@ -238,7 +227,21 @@
   let scrollInterval = null;
   let isScrolling = false;
 
+  const ADMIN_PIN = "1234";
+
   const chromaticScale = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+
+  function checkAdminAccess() {
+    const pin = prompt("Wprowadź kod PIN, aby uzyskać dostęp do edycji/dodawania:");
+    if (pin === ADMIN_PIN) {
+      return true;
+    } else {
+      if (pin !== null) {
+        alert("Błędny kod PIN!");
+      }
+      return false;
+    }
+  }
 
   async function fetchFromFirebase() {
     if (!db) return;
@@ -261,32 +264,6 @@
     document.querySelectorAll('.container > div').forEach(div => div.classList.add('hidden'));
     const target = document.getElementById(viewId);
     if (target) target.classList.remove('hidden');
-  };
-
-  // --- OBSŁUGA PIN-U ---
-  window.requestPinForAdd = function() {
-    pendingPinAction = 'add';
-    document.getElementById('pin-input').value = '';
-    window.showView('view-pin');
-  };
-
-  window.requestPinForEdit = function() {
-    pendingPinAction = 'edit';
-    document.getElementById('pin-input').value = '';
-    window.showView('view-pin');
-  };
-
-  window.verifyPin = function() {
-    const enteredPin = document.getElementById('pin-input').value;
-    if (enteredPin === ADMIN_PIN) {
-      if (pendingPinAction === 'add') {
-        window.openAddForm();
-      } else if (pendingPinAction === 'edit') {
-        window.editCurrentSong();
-      }
-    } else {
-      alert("Niepoprawny PIN!");
-    }
   };
 
   function renderAll() {
@@ -414,11 +391,21 @@
     chordsEl.innerText = song.chords || 'Brak akordów.';
     chordsEl.style.display = 'none';
 
-    // Obsługa odtwarzacza audio
+    // Obsługa odtwarzacza audio i konwersja linków Google Drive
     const audioContainer = document.getElementById('view-audio-container');
     const audioPlayer = document.getElementById('view-audio-player');
+    
     if (song.audioUrl && song.audioUrl.trim() !== '') {
-      audioPlayer.src = song.audioUrl.trim();
+      let rawUrl = song.audioUrl.trim();
+      
+      if (rawUrl.includes('drive.google.com')) {
+        const match = rawUrl.match(/\/d\/([^\/]+)/) || rawUrl.match(/id=([^&]+)/);
+        if (match && match[1]) {
+          rawUrl = `https://drive.google.com/uc?export=download&id=${match[1]}`;
+        }
+      }
+
+      audioPlayer.src = rawUrl;
       audioContainer.classList.remove('hidden');
     } else {
       audioPlayer.pause();
@@ -525,6 +512,8 @@
   };
 
   window.openAddForm = function() {
+    if (!checkAdminAccess()) return;
+
     document.getElementById('form-header').innerText = "Dodaj Utwór";
     document.getElementById('form-id').value = "";
     document.getElementById('form-title').value = "";
@@ -532,4 +521,19 @@
     document.getElementById('form-audio-url').value = "";
     document.getElementById('form-lyrics').value = "";
     document.getElementById('form-chords').value = "";
-    document.getElementB
+    document.getElementById('btn-delete').classList.add('hidden');
+    window.showView('view-form');
+  };
+
+  window.editCurrentSong = function() {
+    if (!checkAdminAccess()) return;
+
+    const song = songs.find(s => s.id === currentSongId);
+    if (!song) return;
+
+    document.getElementById('form-header').innerText = "Edytuj Utwór";
+    document.getElementById('form-id').value = song.id;
+    document.getElementById('form-title').value = song.title;
+    document.getElementById('form-category').value = song.category || "";
+    document.getElementById('form-audio-url').value = song.audioUrl || "";
+    document.getEl
