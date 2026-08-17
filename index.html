@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pl">
 <head>
@@ -548,4 +549,20 @@
     if (!id) return;
 
     if (db) {
-      try { await deleteDo
+      try { await deleteDoc(doc(db, "songs", id)); } catch(e){}
+    }
+
+    songs = songs.filter(s => s.id !== id);
+    repertuarIds = repertuarIds.filter(i => i !== id);
+    localStorage.setItem('spiewnik_songs', JSON.stringify(songs));
+    localStorage.setItem('spiewnik_repertuar', JSON.stringify(repertuarIds));
+    renderAll();
+    showView('view-home');
+  };
+
+  renderAll();
+  fetchFromFirebase();
+</script>
+
+</body>
+</html>
