@@ -250,21 +250,21 @@
       <h1>Śpiewnik Psie Pole</h1>
       <img src="https://media.istockphoto.com/id/2161124245/photo/christians-raising-their-hands-in-praise-and-worship-at-a-night-music-concert.jpg?s=612x612&w=0&k=20&c=2Lt_xDFW_Wt4V20K_BA2fH43ta9hBbQP_y6NfvBjjI0=" alt="Uwielbienie" class="hero-img">
     </header>
-    <button class="btn" onclick="showView('repertuar-view')">📌 Repertuar</button>
-    <button class="btn" onclick="showView('archive-view')">📁 Archiwum Repertuarów</button>
-    <button class="btn" onclick="showView('songs-list-view')">📖 Przeglądaj Śpiewnik</button>
-    <button class="btn btn-secondary" onclick="openAddForm()">➕ Dodaj Utwór</button>
+    <button class="btn" id="btn-nav-repertuar">📌 Repertuar</button>
+    <button class="btn" id="btn-nav-archive">📁 Archiwum Repertuarów</button>
+    <button class="btn" id="btn-nav-songs">📖 Przeglądaj Śpiewnik</button>
+    <button class="btn btn-secondary" id="btn-nav-add">➕ Dodaj Utwór</button>
   </div>
 
   <!-- REPERTUAR -->
   <div id="repertuar-view" class="hidden">
-    <button class="btn btn-secondary" onclick="showView('home-view')">← Menu Główny</button>
+    <button class="btn btn-secondary" onclick="window.showView('home-view')">← Menu Główny</button>
     <h2 style="color: var(--accent);">📌 Bieżący Repertuar</h2>
     
     <div style="background-color: var(--card-bg); padding: 12px; border-radius: 8px; margin-bottom: 16px;">
       <label style="font-size: 0.85rem; color: var(--text-sub); display: block; margin-bottom: 4px;">Zapisz ten repertuar w archiwum:</label>
       <input type="text" id="archive-name-input" placeholder="Wpisz nazwę (np. MSZA 24.08)..." style="margin-bottom: 8px;">
-      <button class="btn btn-small" style="width: 100%; margin: 0;" onclick="saveRepertuarToArchive()">💾 Zapisz do Archiwum</button>
+      <button class="btn btn-small" style="width: 100%; margin: 0;" onclick="window.saveRepertuarToArchive()">💾 Zapisz do Archiwum</button>
     </div>
 
     <div id="repertuar-list">Brak utworów w repertuarze.</div>
@@ -272,16 +272,16 @@
 
   <!-- ARCHIWUM REPERTUARÓW -->
   <div id="archive-view" class="hidden">
-    <button class="btn btn-secondary" onclick="showView('home-view')">← Menu Główny</button>
+    <button class="btn btn-secondary" onclick="window.showView('home-view')">← Menu Główny</button>
     <h2 style="color: var(--primary);">📁 Archiwum Repertuarów</h2>
     <div id="archive-list">Ładowanie archiwum...</div>
   </div>
 
   <!-- LISTA WSZYSTKICH PIEŚNI -->
   <div id="songs-list-view" class="hidden">
-    <button class="btn btn-secondary" onclick="showView('home-view')">← Menu Główny</button>
+    <button class="btn btn-secondary" onclick="window.showView('home-view')">← Menu Główny</button>
     
-    <input type="text" id="search-input" class="search-box" placeholder="🔍 Szukaj utworu..." oninput="filterSongs()">
+    <input type="text" id="search-input" class="search-box" placeholder="🔍 Szukaj utworu..." oninput="window.filterSongs()">
     
     <div id="categories-bar" class="categories-bar"></div>
     <div id="all-songs-list">Ładowanie pieśni...</div>
@@ -289,22 +289,22 @@
 
   <!-- WIDOK JEDNEGO UTWORU -->
   <div id="single-song-view" class="hidden">
-    <button class="btn btn-secondary" onclick="goBackFromSong()">← Powrót</button>
+    <button class="btn btn-secondary" onclick="window.goBackFromSong()">← Powrót</button>
     <h2 id="view-song-title" style="color: var(--primary); margin-bottom: 4px;"></h2>
     <span id="view-song-category" class="song-category" style="margin-left: 0;"></span>
     
     <div class="toolbar">
-      <button class="btn btn-secondary btn-small" onclick="toggleChords()">🎸 Akordy</button>
-      <button class="btn btn-secondary btn-small" onclick="transpose(-1)">♭ -1</button>
-      <button class="btn btn-secondary btn-small" onclick="transpose(1)">♯ +1</button>
+      <button class="btn btn-secondary btn-small" onclick="window.toggleChords()">🎸 Akordy</button>
+      <button class="btn btn-secondary btn-small" onclick="window.transpose(-1)">♭ -1</button>
+      <button class="btn btn-secondary btn-small" onclick="window.transpose(1)">♯ +1</button>
       <span style="color: var(--text-sub); font-size: 0.8rem; margin: 0 4px;">|</span>
-      <button class="btn btn-secondary btn-small" onclick="changeFontSize(-2)">A-</button>
-      <button class="btn btn-secondary btn-small" onclick="changeFontSize(2)">A+</button>
+      <button class="btn btn-secondary btn-small" onclick="window.changeFontSize(-2)">A-</button>
+      <button class="btn btn-secondary btn-small" onclick="window.changeFontSize(2)">A+</button>
       <span style="color: var(--text-sub); font-size: 0.8rem; margin: 0 4px;">|</span>
-      <button class="btn btn-secondary btn-small" onclick="editCurrentSong()">✏️ Edytuj</button>
+      <button class="btn btn-secondary btn-small" onclick="window.editCurrentSong()">✏️ Edytuj</button>
       
       <div class="scroll-control">
-        <button id="btn-scroll" class="btn btn-small" style="margin: 0;" onclick="toggleAutoScroll()">📜 Start Auto</button>
+        <button id="btn-scroll" class="btn btn-small" style="margin: 0;" onclick="window.toggleAutoScroll()">📜 Start Auto</button>
         <span style="font-size: 0.8rem; color: var(--text-sub);">Prędkość:</span>
         <input type="range" id="scroll-speed" min="1" max="10" value="3" style="flex-grow: 1; margin: 0;">
       </div>
@@ -317,7 +317,7 @@
 
   <!-- FORMULARZ DODAWANIA / EDYCJI -->
   <div id="add-view" class="hidden">
-    <button class="btn btn-secondary" onclick="showView('home-view')">← Anuluj</button>
+    <button class="btn btn-secondary" onclick="window.showView('home-view')">← Anuluj</button>
     <h2 id="form-title" style="color: var(--primary);">Dodaj Utwór</h2>
     
     <input type="hidden" id="song-id">
@@ -336,8 +336,8 @@
     <label style="font-size: 0.85rem; color: var(--text-sub); display: block; margin-bottom: 4px;">Plik Nuty / PDF / Zdjęcie:</label>
     <input type="file" id="song-pdf-file" accept="application/pdf,image/*">
 
-    <button class="btn" onclick="saveSong()">Zapisz w chmurze</button>
-    <button id="btn-delete-song" class="btn btn-danger hidden" onclick="deleteCurrentSong()">🗑️ Usuń Utwór</button>
+    <button class="btn" onclick="window.saveSong()">Zapisz w chmurze</button>
+    <button id="btn-delete-song" class="btn btn-danger hidden" onclick="window.deleteCurrentSong()">🗑️ Usuń Utwór</button>
   </div>
 </div>
 
@@ -502,8 +502,8 @@
           <div style="font-size: 0.8rem; color: var(--text-sub);">Liczba pieśni: ${arch.songIds ? arch.songIds.length : 0}</div>
         </div>
         <div>
-          <button class="btn btn-secondary btn-small" onclick="loadArchiveToRepertuar('${arch.id}')">📂 Wczytaj</button>
-          <button class="btn btn-danger btn-small" onclick="deleteArchive('${arch.id}')">🗑️</button>
+          <button class="btn btn-secondary btn-small" onclick="window.loadArchiveToRepertuar('${arch.id}')">📂 Wczytaj</button>
+          <button class="btn btn-danger btn-small" onclick="window.deleteArchive('${arch.id}')">🗑️</button>
         </div>
       `;
       container.appendChild(div);
@@ -516,10 +516,10 @@
     const isInRepertuar = repertuarIds.includes(song.id);
 
     div.innerHTML = `
-      <button class="song-title-btn" onclick="openSong('${song.id}')">
+      <button class="song-title-btn" onclick="window.openSong('${song.id}')">
         ${song.title} <span class="song-category">${song.category || 'Uwielbienie'}</span>
       </button>
-      <button class="btn-add-repertuar" onclick="toggleRepertuar('${song.id}')">
+      <button class="btn-add-repertuar" onclick="window.toggleRepertuar('${song.id}')">
         ${isInRepertuar ? '➖' : '➕'}
       </button>
     `;
@@ -627,8 +627,4 @@
 
   window.toggleRepertuar = function(id) {
     if (repertuarIds.includes(id)) {
-      repertuarIds = repertuarIds.filter(item => item !== id);
-    } else {
-      repertuarIds.push(id);
-    }
-    localStorage.setItem(
+      repertuarIds = repertuarIds.filter(item => i
