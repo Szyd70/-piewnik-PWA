@@ -188,7 +188,20 @@
 
 </div>
 
-<script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+  const firebaseConfig = { projectId: "spiewnik-psie-pole" };
+  let db = null;
+
+  try {
+    const app = initializeApp(firebaseConfig);
+    db = getFirestore(app);
+  } catch(e) {
+    console.warn("Tryb Offline:", e);
+  }
+
   let songs = JSON.parse(localStorage.getItem('spiewnik_songs') || '[]');
   let archives = JSON.parse(localStorage.getItem('spiewnik_archives') || '[]');
   let repertuarIds = JSON.parse(localStorage.getItem('spiewnik_repertuar') || '[]');
@@ -207,12 +220,28 @@
     return pin === ADMIN_PIN;
   }
 
-  function showView(viewId) {
+  async function fetchFromFirebase() {
+    if (!db) return;
+    try {
+      const querySnapshot = await getDocs(collection(db, "songs"));
+      if (!querySnapshot.empty) {
+        const fetched = [];
+        querySnapshot.forEach((docSnap) => fetched.push({ id: docSnap.id, ...docSnap.data() }));
+        songs = fetched;
+        localStorage.setItem('spiewnik_songs', JSON.stringify(songs));
+        renderAll();
+      }
+    } catch(e) {
+      console.log("Błąd pobierania z Firebase, korzystam z pamięci lokalnej.");
+    }
+  }
+
+  window.showView = function(viewId) {
     stopAutoScroll();
     document.querySelectorAll('.container > div').forEach(div => div.classList.add('hidden'));
     const target = document.getElementById(viewId);
     if (target) target.classList.remove('hidden');
-  }
+  };
 
   function renderAll() {
     renderCategoryChips();
@@ -322,7 +351,7 @@
     return div;
   }
 
-  function openSong(id) {
+  window.openSong = function(id) {
     const song = songs.find(s => s.id === id);
     if (!song) return;
 
@@ -351,20 +380,20 @@
     }
 
     showView('view-single');
-  }
+  };
 
-  function toggleChords() {
+  window.toggleChords = function() {
     const el = document.getElementById('view-chords');
     el.style.display = (el.style.display === 'block') ? 'none' : 'block';
-  }
+  };
 
-  function changeFontSize(delta) {
+  window.changeFontSize = function(delta) {
     const el = document.getElementById('view-lyrics');
     const size = parseFloat(window.getComputedStyle(el).fontSize);
     el.style.fontSize = (size + delta) + 'px';
-  }
+  };
 
-  function transpose(steps) {
+  window.transpose = function(steps) {
     const el = document.getElementById('view-chords');
     if (!el.innerText || el.innerText === 'Brak akordów.') return;
     
@@ -375,12 +404,12 @@
       if (newIdx < 0) newIdx += 12;
       return chromaticScale[newIdx];
     });
-  }
+  };
 
-  function toggleAutoScroll() {
+  window.toggleAutoScroll = function() {
     if (isScrolling) stopAutoScroll();
     else startAutoScroll();
-  }
+  };
 
   function startAutoScroll() {
     isScrolling = true;
@@ -398,7 +427,7 @@
     if (btn) btn.innerText = "📜 Auto Scroll";
   }
 
-  function toggleRepertuar(id) {
+  window.toggleRepertuar = function(id) {
     if (repertuarIds.includes(id)) {
       repertuarIds = repertuarIds.filter(i => i !== id);
     } else {
@@ -406,9 +435,9 @@
     }
     localStorage.setItem('spiewnik_repertuar', JSON.stringify(repertuarIds));
     renderAll();
-  }
+  };
 
-  function saveRepertuarToArchive() {
+  window.saveRepertuarToArchive = function() {
     const input = document.getElementById('archive-name-input');
     const name = input.value.trim();
     if (!name || repertuarIds.length === 0) return alert("Wpisz nazwę zestawu!");
@@ -417,31 +446,31 @@
     localStorage.setItem('spiewnik_archives', JSON.stringify(archives));
     input.value = '';
     renderAll();
-  }
+  };
 
-  function loadArchive(id) {
+  window.loadArchive = function(id) {
     const arch = archives.find(a => a.id === id);
     if (!arch) return;
     repertuarIds = [...arch.songIds];
     localStorage.setItem('spiewnik_repertuar', JSON.stringify(repertuarIds));
     renderAll();
     showView('view-repertuar');
-  }
+  };
 
-  function deleteArchive(id) {
+  window.deleteArchive = function(id) {
     archives = archives.filter(a => a.id !== id);
     localStorage.setItem('spiewnik_archives', JSON.stringify(archives));
     renderAll();
-  }
+  };
 
-  function filterSongs() {
+  window.filterSongs = function() {
     const q = document.getElementById('search-input').value.toLowerCase();
     document.querySelectorAll('#all-songs-list .song-item').forEach(row => {
       row.style.display = row.innerText.toLowerCase().includes(q) ? 'flex' : 'none';
     });
-  }
+  };
 
-  function openAddForm() {
+  window.openAddForm = function() {
     if (!checkAdminAccess()) return;
 
     document.getElementById('form-header').innerText = "Dodaj Utwór";
@@ -453,9 +482,9 @@
     document.getElementById('form-chords').value = "";
     document.getElementById('btn-delete').classList.add('hidden');
     showView('view-form');
-  }
+  };
 
-  function editCurrentSong() {
+  window.editCurrentSong = function() {
     if (!checkAdminAccess()) return;
 
     const song = songs.find(s => s.id === currentSongId);
@@ -470,9 +499,9 @@
     document.getElementById('form-chords').value = song.chords || "";
     document.getElementById('btn-delete').classList.remove('hidden');
     showView('view-form');
-  }
+  };
 
-  function saveSong() {
+  window.saveSong = async function() {
     const id = document.getElementById('form-id').value;
     const title = document.getElementById('form-title').value.trim();
     const category = document.getElementById('form-category').value.trim() || "Uwielbienie";
@@ -482,33 +511,38 @@
 
     if (!title || !lyrics) return alert("Wypełnij tytuł i tekst!");
 
+    const songData = { title, category, audioUrl, lyrics, chords };
+
+    if (db) {
+      try {
+        if (id) {
+          await updateDoc(doc(db, "songs", id), songData);
+        } else {
+          const docRef = await addDoc(collection(db, "songs"), songData);
+          songData.id = docRef.id;
+        }
+      } catch(e) {
+        console.error("Błąd zapisu w chmurze:", e);
+      }
+    }
+
     if (id) {
       const idx = songs.findIndex(s => s.id === id);
-      if (idx !== -1) songs[idx] = { id, title, category, audioUrl, lyrics, chords };
+      if (idx !== -1) songs[idx] = { id, ...songData };
     } else {
-      const newSong = { id: Date.now().toString(), title, category, audioUrl, lyrics, chords };
-      songs.push(newSong);
+      if (!songData.id) songData.id = Date.now().toString();
+      songs.push(songData);
     }
 
     localStorage.setItem('spiewnik_songs', JSON.stringify(songs));
     renderAll();
     showView('view-home');
-  }
+  };
 
-  function deleteCurrentSong() {
+  window.deleteCurrentSong = async function() {
     const id = document.getElementById('form-id').value;
     if (!id) return;
 
-    songs = songs.filter(s => s.id !== id);
-    repertuarIds = repertuarIds.filter(i => i !== id);
-    localStorage.setItem('spiewnik_songs', JSON.stringify(songs));
-    localStorage.setItem('spiewnik_repertuar', JSON.stringify(repertuarIds));
-    renderAll();
-    showView('view-home');
-  }
-
-  renderAll();
-</script>
-
-</body>
-</html>
+    if (db) {
+      try { await deleteDoc(doc(db, "songs", id)); } catch(e){}
+ 
