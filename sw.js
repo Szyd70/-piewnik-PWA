@@ -1,4 +1,4 @@
-const CACHE_NAME = 'spiewnik-v3';
+const CACHE_NAME = 'spiewnik-v4';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
