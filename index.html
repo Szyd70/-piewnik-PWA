@@ -89,6 +89,7 @@
     .controls-panel { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 15px; }
     
     audio { width: 100%; margin-top: 10px; border-radius: 8px; }
+    iframe.drive-player { width: 100%; height: 60px; border: none; border-radius: 8px; margin-top: 10px; }
     .audio-section { margin-top: 5px; margin-bottom: 5px; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px; }
     .audio-section label { display: block; margin-bottom: 5px; font-size: 0.9rem; color: var(--primary); }
     .audio-hint { font-size: 0.75rem; color: var(--text-sub); margin-top: 4px; display: block; }
@@ -106,7 +107,7 @@
     <button class="btn btn-filled" onclick="window.showView('view-repertuar')">📌 Repertuar</button>
     <button class="btn btn-filled" onclick="window.showView('view-archive')">📁 Archiwum Repertuarów</button>
     <button class="btn btn-filled" onclick="window.showView('view-songs')">📖 Przeglądaj Śpiewnik</button>
-    <button class="btn" onclick="window.openAddForm()">➕ Dodaj Utwór</button>
+    <button class="btn" onclick="window.openAddForm()">➕ Dodaj Utwór 🔒</button>
   </div>
 
   <!-- WIDOK PRZEGLĄDANIA ŚPIEWNIKA -->
@@ -150,18 +151,14 @@
   <div id="view-single" class="hidden">
     <div class="nav-bar">
       <button class="btn btn-secondary btn-small" onclick="window.goBackFromSong()">⬅️ Powrót</button>
-      <button class="btn btn-secondary btn-small" onclick="window.editCurrentSong()">✏️ Edytuj</button>
+      <button class="btn btn-secondary btn-small" onclick="window.editCurrentSong()">✏️ Edytuj 🔒</button>
     </div>
 
     <h2 id="view-title"></h2>
     <span id="view-category" style="color: var(--primary); font-size: 0.9rem;"></span>
 
-    <!-- ODTWARZACZ AUDIO -->
-    <div id="view-audio-container" class="hidden">
-      <audio id="view-audio-player" controls preload="metadata">
-        Twoja przeglądarka nie wspiera odtwarzacza audio.
-      </audio>
-    </div>
+    <!-- BEZPIECZNY ODTWARZACZ AUDIO -->
+    <div id="view-audio-container" class="hidden"></div>
 
     <div class="controls-panel">
       <button class="btn btn-secondary btn-small" onclick="window.toggleChords()">🎸 Akordy</button>
@@ -190,7 +187,7 @@
     <div class="audio-section">
       <label for="form-audio-url">🎵 Link do nagrania (MP3 / Dysk Google):</label>
       <input type="text" id="form-audio-url" class="input-field" placeholder="https://drive.google.com/..." style="margin-bottom:0;">
-      <span class="audio-hint">Upewnij się, że plik na Dysku Google ma dostęp: "Każdy mający link".</span>
+      <span class="audio-hint">Obsługuje linki z Dysku Google oraz bezpośrednie pliki .mp3</span>
     </div>
 
     <textarea id="form-lyrics" class="input-field" placeholder="Tekst pieśni *" style="margin-top: 12px;"></textarea>
@@ -227,7 +224,15 @@
   let scrollInterval = null;
   let isScrolling = false;
 
+  const ADMIN_PIN = "1234";
   const chromaticScale = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+
+  function checkAdminAccess() {
+    const pin = prompt("Wprowadź kod PIN (1234), aby uzyskać dostęp:");
+    if (pin === ADMIN_PIN) return true;
+    if (pin !== null) alert("Błędny kod PIN!");
+    return false;
+  }
 
   async function fetchFromFirebase() {
     if (!db) return;
@@ -241,7 +246,7 @@
         renderAll();
       }
     } catch(e) {
-      console.log("Ładowanie z pamięci podręcznej urządzeń.");
+      console.log("Ładowanie z pamięci lokalnej urządzeń.");
     }
   }
 
@@ -377,26 +382,27 @@
     chordsEl.innerText = song.chords || 'Brak akordów.';
     chordsEl.style.display = 'none';
 
-    // Obsługa odtwarzacza audio i konwersja linków Google Drive
+    // Bezpieczny wygenerowany odtwarzacz audio
     const audioContainer = document.getElementById('view-audio-container');
-    const audioPlayer = document.getElementById('view-audio-player');
+    audioContainer.innerHTML = ''; // Wyczyszczenie starego stanu
     
     if (song.audioUrl && song.audioUrl.trim() !== '') {
-      let rawUrl = song.audioUrl.trim();
+      const url = song.audioUrl.trim();
       
-      // Przekształcanie linku z Dysku Google do bezpośredniego strumienia MP3
-      if (rawUrl.includes('drive.google.com')) {
-        const match = rawUrl.match(/\/d\/([^\/]+)/) || rawUrl.match(/id=([^&]+)/);
+      if (url.includes('drive.google.com')) {
+        const match = url.match(/\/d\/([^\/]+)/) || url.match(/id=([^&]+)/);
         if (match && match[1]) {
-          rawUrl = `https://drive.google.com/uc?export=download&id=${match[1]}`;
+          const driveId = match[1];
+          audioContainer.innerHTML = `<iframe class="drive-player" src="https://drive.google.com/file/d/${driveId}/preview" allow="autoplay"></iframe>`;
+          audioContainer.classList.remove('hidden');
+        } else {
+          audioContainer.classList.add('hidden');
         }
+      } else {
+        audioContainer.innerHTML = `<audio controls preload="none"><source src="${url}" type="audio/mpeg">Twoja przeglądarka nie obsługuje tego pliku audio.</audio>`;
+        audioContainer.classList.remove('hidden');
       }
-
-      audioPlayer.src = rawUrl;
-      audioContainer.classList.remove('hidden');
     } else {
-      audioPlayer.pause();
-      audioPlayer.src = '';
       audioContainer.classList.add('hidden');
     }
 
@@ -404,8 +410,7 @@
   };
 
   window.goBackFromSong = function() { 
-    const audioPlayer = document.getElementById('view-audio-player');
-    if (audioPlayer) audioPlayer.pause();
+    document.getElementById('view-audio-container').innerHTML = ''; // Zatrzymanie audio przy wyjściu
     window.showView(previousView); 
   };
 
@@ -499,6 +504,8 @@
   };
 
   window.openAddForm = function() {
+    if (!checkAdminAccess()) return;
+
     document.getElementById('form-header').innerText = "Dodaj Utwór";
     document.getElementById('form-id').value = "";
     document.getElementById('form-title').value = "";
@@ -511,19 +518,11 @@
   };
 
   window.editCurrentSong = function() {
+    if (!checkAdminAccess()) return;
+
     const song = songs.find(s => s.id === currentSongId);
     if (!song) return;
 
     document.getElementById('form-header').innerText = "Edytuj Utwór";
     document.getElementById('form-id').value = song.id;
-    document.getElementById('form-title').value = song.title;
-    document.getElementById('form-category').value = song.category || "";
-    document.getElementById('form-audio-url').value = song.audioUrl || "";
-    document.getElementById('form-lyrics').value = song.lyrics || song.text || "";
-    document.getElementById('form-chords').value = song.chords || "";
-    document.getElementById('btn-delete').classList.remove('hidden');
-    window.showView('view-form');
-  };
-
-  window.saveSong = async function() {
-    const id = document.g
+    document.getElementById('form-title').val
