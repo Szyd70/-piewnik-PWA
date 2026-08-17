@@ -103,20 +103,20 @@
     <h1>ŚPIEWNIK PSIE POLE</h1>
     <img src="IMG_20260817_103611.jpg" class="banner" alt="Baner Śpiewnik">
 
-    <button class="btn btn-filled" onclick="window.showView('view-repertuar')">📌 Repertuar</button>
-    <button class="btn btn-filled" onclick="window.showView('view-archive')">📁 Archiwum Repertuarów</button>
-    <button class="btn btn-filled" onclick="window.showView('view-songs')">📖 Przeglądaj Śpiewnik</button>
-    <button class="btn" onclick="window.openAddForm()">➕ Dodaj Utwór 🔒</button>
+    <button class="btn btn-filled" onclick="showView('view-repertuar')">📌 Repertuar</button>
+    <button class="btn btn-filled" onclick="showView('view-archive')">📁 Archiwum Repertuarów</button>
+    <button class="btn btn-filled" onclick="showView('view-songs')">📖 Przeglądaj Śpiewnik</button>
+    <button class="btn" onclick="openAddForm()">➕ Dodaj Utwór 🔒</button>
   </div>
 
   <!-- WIDOK PRZEGLĄDANIA ŚPIEWNIKA -->
   <div id="view-songs" class="hidden">
     <div class="nav-bar">
-      <button class="btn btn-secondary btn-small" onclick="window.showView('view-home')">⬅️ Powrót</button>
+      <button class="btn btn-secondary btn-small" onclick="showView('view-home')">⬅️ Powrót</button>
       <h2>Śpiewnik</h2>
     </div>
 
-    <input type="text" id="search-input" class="input-field" placeholder="🔎 Szukaj po tytule..." oninput="window.filterSongs()">
+    <input type="text" id="search-input" class="input-field" placeholder="🔎 Szukaj po tytule..." oninput="filterSongs()">
 
     <div class="cat-bar" id="categories-bar"></div>
     <div id="all-songs-list"></div>
@@ -125,7 +125,7 @@
   <!-- WIDOK REPERTUARU -->
   <div id="view-repertuar" class="hidden">
     <div class="nav-bar">
-      <button class="btn btn-secondary btn-small" onclick="window.showView('view-home')">⬅️ Powrót</button>
+      <button class="btn btn-secondary btn-small" onclick="showView('view-home')">⬅️ Powrót</button>
       <h2>Bieżący Repertuar</h2>
     </div>
 
@@ -133,14 +133,14 @@
 
     <div style="margin-top: 20px; border-top: 1px solid var(--border); padding-top: 15px;">
       <input type="text" id="archive-name-input" class="input-field" placeholder="Nazwa zestawu (np. Niedziela 10:00)">
-      <button class="btn btn-filled" onclick="window.saveRepertuarToArchive()">💾 Zapisz do Archiwum</button>
+      <button class="btn btn-filled" onclick="saveRepertuarToArchive()">💾 Zapisz do Archiwum</button>
     </div>
   </div>
 
   <!-- WIDOK ARCHIWUM -->
   <div id="view-archive" class="hidden">
     <div class="nav-bar">
-      <button class="btn btn-secondary btn-small" onclick="window.showView('view-home')">⬅️ Powrót</button>
+      <button class="btn btn-secondary btn-small" onclick="showView('view-home')">⬅️ Powrót</button>
       <h2>Archiwum</h2>
     </div>
     <div id="archive-list"></div>
@@ -149,27 +149,27 @@
   <!-- WIDOK JEDNEGO UTWORU -->
   <div id="view-single" class="hidden">
     <div class="nav-bar">
-      <button class="btn btn-secondary btn-small" onclick="window.goBackFromSong()">⬅️ Powrót</button>
-      <button class="btn btn-secondary btn-small" onclick="window.editCurrentSong()">✏️ Edytuj 🔒</button>
+      <button class="btn btn-secondary btn-small" onclick="goBackFromSong()">⬅️ Powrót</button>
+      <button class="btn btn-secondary btn-small" onclick="editCurrentSong()">✏️ Edytuj 🔒</button>
     </div>
 
     <h2 id="view-title"></h2>
     <span id="view-category" style="color: var(--primary); font-size: 0.9rem;"></span>
 
-    <!-- ODTWARZACZ AUDIO GOOGLE / HTML5 -->
+    <!-- ODTWARZACZ AUDIO -->
     <div id="view-audio-container" class="hidden">
-      <audio id="view-audio-player" controls preload="metadata">
+      <audio id="view-audio-player" controls preload="none">
         Twoja przeglądarka nie wspiera odtwarzacza audio.
       </audio>
     </div>
 
     <div class="controls-panel">
-      <button class="btn btn-secondary btn-small" onclick="window.toggleChords()">🎸 Akordy</button>
-      <button class="btn btn-secondary btn-small" onclick="window.changeFontSize(2)">A+</button>
-      <button class="btn btn-secondary btn-small" onclick="window.changeFontSize(-2)">A-</button>
-      <button class="btn btn-secondary btn-small" onclick="window.transpose(1)">♭/♯ +1</button>
-      <button class="btn btn-secondary btn-small" onclick="window.transpose(-1)">♭/♯ -1</button>
-      <button class="btn btn-secondary btn-small" id="btn-scroll" onclick="window.toggleAutoScroll()">📜 Auto Scroll</button>
+      <button class="btn btn-secondary btn-small" onclick="toggleChords()">🎸 Akordy</button>
+      <button class="btn btn-secondary btn-small" onclick="changeFontSize(2)">A+</button>
+      <button class="btn btn-secondary btn-small" onclick="changeFontSize(-2)">A-</button>
+      <button class="btn btn-secondary btn-small" onclick="transpose(1)">♭/♯ +1</button>
+      <button class="btn btn-secondary btn-small" onclick="transpose(-1)">♭/♯ -1</button>
+      <button class="btn btn-secondary btn-small" id="btn-scroll" onclick="toggleAutoScroll()">📜 Auto Scroll</button>
     </div>
 
     <div id="view-chords" class="song-chords"></div>
@@ -179,7 +179,7 @@
   <!-- WIDOK DODAWANIA / EDYCJI -->
   <div id="view-form" class="hidden">
     <div class="nav-bar">
-      <button class="btn btn-secondary btn-small" onclick="window.showView('view-home')">⬅️ Anuluj</button>
+      <button class="btn btn-secondary btn-small" onclick="showView('view-home')">⬅️ Anuluj</button>
       <h2 id="form-header">Dodaj Utwór</h2>
     </div>
 
@@ -188,21 +188,20 @@
     <input type="text" id="form-category" class="input-field" placeholder="Kategoria (np. Uwielbienie, Kolędy)">
     
     <div class="audio-section">
-      <label for="form-audio-url">🎵 Link do nagrania (MP3 / Dysk Google):</label>
-      <input type="text" id="form-audio-url" class="input-field" placeholder="https://drive.google.com/..." style="margin-bottom:0;">
-      <span class="audio-hint">Wklej link do pliku MP3 (np. z Dysku Google – upewnij się, że plik ma udostępnienie „Każdy mający link”).</span>
+      <label for="form-audio-url">🎵 Link do nagrania MP3:</label>
+      <input type="text" id="form-audio-url" class="input-field" placeholder="https://..." style="margin-bottom:0;">
+      <span class="audio-hint">Wklej bezpośredni link do pliku MP3 lub link udostępniania z Dysku Google.</span>
     </div>
 
     <textarea id="form-lyrics" class="input-field" placeholder="Tekst pieśni *" style="margin-top: 12px;"></textarea>
     <textarea id="form-chords" class="input-field" placeholder="Akordy (opcjonalnie)"></textarea>
 
-    <button class="btn btn-filled" onclick="window.saveSong()">💾 Zapisz</button>
-    <button class="btn btn-danger hidden" id="btn-delete" onclick="window.deleteCurrentSong()">🗑️ Usuń Utwór</button>
+    <button class="btn btn-filled" onclick="saveSong()">💾 Zapisz</button>
+    <button class="btn btn-danger hidden" id="btn-delete" onclick="deleteCurrentSong()">🗑️ Usuń Utwór</button>
   </div>
 
 </div>
 
-<!-- Inicjalizacja Połączenia i Logiki -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -214,7 +213,7 @@
     const app = initializeApp(firebaseConfig);
     db = getFirestore(app);
   } catch(e) {
-    console.warn("Tryb Offline (brak połączenia z Firebase):", e);
+    console.warn("Tryb Offline:", e);
   }
 
   let songs = JSON.parse(localStorage.getItem('spiewnik_songs') || '[]');
@@ -228,19 +227,11 @@
   let isScrolling = false;
 
   const ADMIN_PIN = "1234";
-
   const chromaticScale = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
 
   function checkAdminAccess() {
-    const pin = prompt("Wprowadź kod PIN, aby uzyskać dostęp do edycji/dodawania:");
-    if (pin === ADMIN_PIN) {
-      return true;
-    } else {
-      if (pin !== null) {
-        alert("Błędny kod PIN!");
-      }
-      return false;
-    }
+    const pin = prompt("Wprowadź kod PIN:");
+    return pin === ADMIN_PIN;
   }
 
   async function fetchFromFirebase() {
@@ -255,15 +246,17 @@
         renderAll();
       }
     } catch(e) {
-      console.log("Ładowanie z pamięci podręcznej urządzeń.");
+      console.log("Błąd pobierania z Firebase.");
     }
   }
 
   window.showView = function(viewId) {
     stopAutoScroll();
-    // Zatrzymaj audio przy zmianie widoku
     const audioPlayer = document.getElementById('view-audio-player');
-    if (audioPlayer) audioPlayer.pause();
+    if (audioPlayer) {
+      audioPlayer.pause();
+      audioPlayer.src = "";
+    }
 
     document.querySelectorAll('.container > div').forEach(div => div.classList.add('hidden'));
     const target = document.getElementById(viewId);
@@ -327,7 +320,7 @@
     const list = songs.filter(s => repertuarIds.includes(s.id));
 
     if (list.length === 0) {
-      container.innerHTML = '<p style="color: var(--text-sub);">Repertuar pusty. Dodaj pieśni plusikiem (+).</p>';
+      container.innerHTML = '<p style="color: var(--text-sub);">Repertuar pusty.</p>';
       return;
     }
 
@@ -353,8 +346,8 @@
           <div style="font-size:0.8rem; color:var(--text-sub)">Pieśni: ${arch.songIds.length}</div>
         </div>
         <div>
-          <button class="btn btn-secondary btn-small" onclick="window.loadArchive('${arch.id}')">📂 Wczytaj</button>
-          <button class="btn btn-danger btn-small" onclick="window.deleteArchive('${arch.id}')">🗑️</button>
+          <button class="btn btn-secondary btn-small" onclick="loadArchive('${arch.id}')">📂</button>
+          <button class="btn btn-danger btn-small" onclick="deleteArchive('${arch.id}')">🗑️</button>
         </div>
       `;
       container.appendChild(div);
@@ -368,10 +361,10 @@
     const audioIcon = song.audioUrl ? ' 🎵' : '';
 
     div.innerHTML = `
-      <button class="song-title-btn" onclick="window.openSong('${song.id}')">
+      <button class="song-title-btn" onclick="openSong('${song.id}')">
         ${song.title}${audioIcon} <span class="song-category">${song.category || 'Uwielbienie'}</span>
       </button>
-      <button class="btn btn-secondary btn-small" onclick="window.toggleRepertuar('${song.id}')">
+      <button class="btn btn-secondary btn-small" onclick="toggleRepertuar('${song.id}')">
         ${inRep ? '➖' : '➕'}
       </button>
     `;
@@ -389,27 +382,23 @@
 
     document.getElementById('view-title').innerText = song.title;
     document.getElementById('view-category').innerText = song.category || 'Uwielbienie';
-    document.getElementById('view-lyrics').innerText = song.lyrics || song.text || '';
+    document.getElementById('view-lyrics').innerText = song.lyrics || '';
     
     const chordsEl = document.getElementById('view-chords');
     chordsEl.innerText = song.chords || 'Brak akordów.';
     chordsEl.style.display = 'none';
 
-    // Obsługa odtwarzacza audio i automatyczna konwersja linków z Dysku Google do bezpośredniego strumieniowania MP3
     const audioContainer = document.getElementById('view-audio-container');
     const audioPlayer = document.getElementById('view-audio-player');
     
     if (song.audioUrl && song.audioUrl.trim() !== '') {
       let finalUrl = song.audioUrl.trim();
-      
-      // Automatyczna zamiana linku udostępniania Dysku Google na bezpośredni link pobierania/odtwarzania strumieniowego
       if (finalUrl.includes('drive.google.com')) {
         const match = finalUrl.match(/\/d\/([^\/]+)/) || finalUrl.match(/id=([^&]+)/);
         if (match && match[1]) {
           finalUrl = `https://drive.google.com/uc?export=download&id=${match[1]}`;
         }
       }
-
       audioPlayer.src = finalUrl;
       audioContainer.classList.remove('hidden');
     } else {
@@ -418,13 +407,11 @@
       audioContainer.classList.add('hidden');
     }
 
-    window.showView('view-single');
+    showView('view-single');
   };
 
   window.goBackFromSong = function() { 
-    const audioPlayer = document.getElementById('view-audio-player');
-    if (audioPlayer) audioPlayer.pause();
-    window.showView(previousView); 
+    showView(previousView); 
   };
 
   window.toggleChords = function() {
@@ -485,13 +472,12 @@
   window.saveRepertuarToArchive = function() {
     const input = document.getElementById('archive-name-input');
     const name = input.value.trim();
-    if (!name || repertuarIds.length === 0) return alert("Wpisz nazwę i upewnij się, że repertuar nie jest pusty!");
+    if (!name || repertuarIds.length === 0) return alert("Wpisz nazwę zestawu!");
 
     archives.push({ id: Date.now().toString(), name, songIds: [...repertuarIds] });
     localStorage.setItem('spiewnik_archives', JSON.stringify(archives));
     input.value = '';
     renderAll();
-    alert("Zapisano w archiwum!");
   };
 
   window.loadArchive = function(id) {
@@ -500,7 +486,7 @@
     repertuarIds = [...arch.songIds];
     localStorage.setItem('spiewnik_repertuar', JSON.stringify(repertuarIds));
     renderAll();
-    window.showView('view-repertuar');
+    showView('view-repertuar');
   };
 
   window.deleteArchive = function(id) {
@@ -527,10 +513,29 @@
     document.getElementById('form-lyrics').value = "";
     document.getElementById('form-chords').value = "";
     document.getElementById('btn-delete').classList.add('hidden');
-    window.showView('view-form');
+    showView('view-form');
   };
 
   window.editCurrentSong = function() {
     if (!checkAdminAccess()) return;
 
-    const song = songs.find(s => s.id === cu
+    const song = songs.find(s => s.id === currentSongId);
+    if (!song) return;
+
+    document.getElementById('form-header').innerText = "Edytuj Utwór";
+    document.getElementById('form-id').value = song.id;
+    document.getElementById('form-title').value = song.title;
+    document.getElementById('form-category').value = song.category || "";
+    document.getElementById('form-audio-url').value = song.audioUrl || "";
+    document.getElementById('form-lyrics').value = song.lyrics || "";
+    document.getElementById('form-chords').value = song.chords || "";
+    document.getElementById('btn-delete').classList.remove('hidden');
+    showView('view-form');
+  };
+
+  window.saveSong = async function() {
+    const id = document.getElementById('form-id').value;
+    const title = document.getElementById('form-title').value.trim();
+    const category = document.getElementById('form-category').value.trim() || "Uwielbienie";
+    const audioUrl = document.getElementById('form-audio-url').value.trim();
+    const lyrics = document.getElementById('form-lyric
