@@ -72,7 +72,6 @@
 
     .nav-bar { display: flex; justify-content: space-between; margin-bottom: 15px; }
 
-    /* Pasek kategorii */
     .cat-bar { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 15px; }
     .cat-chip {
       background: var(--card-bg); border: 1px solid var(--border); color: var(--text-sub);
@@ -80,7 +79,6 @@
     }
     .cat-chip.active { background: var(--primary); color: var(--bg); font-weight: bold; }
 
-    /* Podgląd pieśni */
     .song-lyrics { white-space: pre-wrap; font-size: 1.1rem; line-height: 1.6; margin-top: 15px; }
     .song-chords {
       white-space: pre-wrap; font-family: monospace; font-size: 1.1rem;
@@ -97,7 +95,8 @@
   <!-- WIDOK GŁÓWNY -->
   <div id="view-home">
     <h1>ŚPIEWNIK PSIE POLE</h1>
-    <img src="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=600&auto=format&fit=crop&q=80" class="banner" alt="Baner">
+    <!-- Zmieniony baner -->
+    <img src="https://images.unsplash.com/photo-1510915361894-db8b60106cb1?w=800&auto=format&fit=crop&q=80" class="banner" alt="Baner Śpiewnik" onerror="this.src='banner.jpg'">
 
     <button class="btn btn-filled" onclick="showView('view-repertuar')">📌 Repertuar</button>
     <button class="btn btn-filled" onclick="showView('view-archive')">📁 Archiwum Repertuarów</button>
@@ -184,19 +183,24 @@
 
 </div>
 
-<script>
-  // Domyślna lokalna baza danych
+<!-- Inicjalizacja Połączenia i Logiki -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+  const firebaseConfig = { projectId: "spiewnik-psie-pole" };
+  let db = null;
+
+  try {
+    const app = initializeApp(firebaseConfig);
+    db = getFirestore(app);
+  } catch(e) {
+    console.warn("Tryb Offline (brak połączenia z Firebase):", e);
+  }
+
   let songs = JSON.parse(localStorage.getItem('spiewnik_songs') || '[]');
   let archives = JSON.parse(localStorage.getItem('spiewnik_archives') || '[]');
   let repertuarIds = JSON.parse(localStorage.getItem('spiewnik_repertuar') || '[]');
-
-  // Przykładowe dane na start, jeśli baza jest pusta
-  if (songs.length === 0) {
-    songs = [
-      { id: '1', title: 'Oto jest dzień', category: 'Uwielbienie', lyrics: 'Oto jest dzień, który dał nam Pan!\nWesołmy się i radujmy się w nim!', chords: 'C G Am F' }
-    ];
-    localStorage.setItem('spiewnik_songs', JSON.stringify(songs));
-  }
 
   let activeCategory = 'Wszystkie';
   let currentSongId = null;
@@ -206,13 +210,28 @@
 
   const chromaticScale = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
 
-  // Nawigacja
-  function showView(viewId) {
+  async function fetchFromFirebase() {
+    if (!db) return;
+    try {
+      const querySnapshot = await getDocs(collection(db, "songs"));
+      if (!querySnapshot.empty) {
+        const fetched = [];
+        querySnapshot.forEach((doc) => fetched.push({ id: doc.id, ...doc.data() }));
+        songs = fetched;
+        localStorage.setItem('spiewnik_songs', JSON.stringify(songs));
+        renderAll();
+      }
+    } catch(e) {
+      console.log("Ładowanie z pamięci podręcznej urządzeń.");
+    }
+  }
+
+  window.showView = function(viewId) {
     stopAutoScroll();
     document.querySelectorAll('.container > div').forEach(div => div.classList.add('hidden'));
     const target = document.getElementById(viewId);
     if (target) target.classList.remove('hidden');
-  }
+  };
 
   function renderAll() {
     renderCategoryChips();
@@ -229,6 +248,7 @@
 
   function renderCategoryChips() {
     const container = document.getElementById('categories-bar');
+    if(!container) return;
     container.innerHTML = '';
     const categories = ['Wszystkie', ...getUniqueCategories()];
 
@@ -247,6 +267,7 @@
 
   function renderSongsList() {
     const container = document.getElementById('all-songs-list');
+    if(!container) return;
     container.innerHTML = '';
 
     let filtered = songs;
@@ -255,7 +276,7 @@
     }
 
     if (filtered.length === 0) {
-      container.innerHTML = '<p style="color: var(--text-sub);">Brak utworów.</p>';
+      container.innerHTML = '<p style="color: var(--text-sub);">Brak utworów w tej kategorii.</p>';
       return;
     }
 
@@ -264,6 +285,7 @@
 
   function renderRepertuar() {
     const container = document.getElementById('repertuar-list');
+    if(!container) return;
     container.innerHTML = '';
     const list = songs.filter(s => repertuarIds.includes(s.id));
 
@@ -277,6 +299,7 @@
 
   function renderArchives() {
     const container = document.getElementById('archive-list');
+    if(!container) return;
     container.innerHTML = '';
 
     if (archives.length === 0) {
@@ -317,7 +340,7 @@
     return div;
   }
 
-  function openSong(id) {
+  window.openSong = function(id) {
     const song = songs.find(s => s.id === id);
     if (!song) return;
 
@@ -328,29 +351,29 @@
 
     document.getElementById('view-title').innerText = song.title;
     document.getElementById('view-category').innerText = song.category || 'Uwielbienie';
-    document.getElementById('view-lyrics').innerText = song.lyrics || '';
+    document.getElementById('view-lyrics').innerText = song.lyrics || song.text || '';
     
     const chordsEl = document.getElementById('view-chords');
     chordsEl.innerText = song.chords || 'Brak akordów.';
     chordsEl.style.display = 'none';
 
-    showView('view-single');
-  }
+    window.showView('view-single');
+  };
 
-  function goBackFromSong() { showView(previousView); }
+  window.goBackFromSong = function() { window.showView(previousView); };
 
-  function toggleChords() {
+  window.toggleChords = function() {
     const el = document.getElementById('view-chords');
     el.style.display = (el.style.display === 'block') ? 'none' : 'block';
-  }
+  };
 
-  function changeFontSize(delta) {
+  window.changeFontSize = function(delta) {
     const el = document.getElementById('view-lyrics');
     const size = parseFloat(window.getComputedStyle(el).fontSize);
     el.style.fontSize = (size + delta) + 'px';
-  }
+  };
 
-  function transpose(steps) {
+  window.transpose = function(steps) {
     const el = document.getElementById('view-chords');
     if (!el.innerText || el.innerText === 'Brak akordów.') return;
     
@@ -361,12 +384,12 @@
       if (newIdx < 0) newIdx += 12;
       return chromaticScale[newIdx];
     });
-  }
+  };
 
-  function toggleAutoScroll() {
+  window.toggleAutoScroll = function() {
     if (isScrolling) stopAutoScroll();
     else startAutoScroll();
-  }
+  };
 
   function startAutoScroll() {
     isScrolling = true;
@@ -384,7 +407,7 @@
     if (btn) btn.innerText = "📜 Auto Scroll";
   }
 
-  function toggleRepertuar(id) {
+  window.toggleRepertuar = function(id) {
     if (repertuarIds.includes(id)) {
       repertuarIds = repertuarIds.filter(i => i !== id);
     } else {
@@ -392,9 +415,9 @@
     }
     localStorage.setItem('spiewnik_repertuar', JSON.stringify(repertuarIds));
     renderAll();
-  }
+  };
 
-  function saveRepertuarToArchive() {
+  window.saveRepertuarToArchive = function() {
     const input = document.getElementById('archive-name-input');
     const name = input.value.trim();
     if (!name || repertuarIds.length === 0) return alert("Wpisz nazwę i upewnij się, że repertuar nie jest pusty!");
@@ -404,31 +427,31 @@
     input.value = '';
     renderAll();
     alert("Zapisano w archiwum!");
-  }
+  };
 
-  function loadArchive(id) {
+  window.loadArchive = function(id) {
     const arch = archives.find(a => a.id === id);
     if (!arch) return;
     repertuarIds = [...arch.songIds];
     localStorage.setItem('spiewnik_repertuar', JSON.stringify(repertuarIds));
     renderAll();
-    showView('view-repertuar');
-  }
+    window.showView('view-repertuar');
+  };
 
-  function deleteArchive(id) {
+  window.deleteArchive = function(id) {
     archives = archives.filter(a => a.id !== id);
     localStorage.setItem('spiewnik_archives', JSON.stringify(archives));
     renderAll();
-  }
+  };
 
-  function filterSongs() {
+  window.filterSongs = function() {
     const q = document.getElementById('search-input').value.toLowerCase();
     document.querySelectorAll('#all-songs-list .song-item').forEach(row => {
       row.style.display = row.innerText.toLowerCase().includes(q) ? 'flex' : 'none';
     });
-  }
+  };
 
-  function openAddForm() {
+  window.openAddForm = function() {
     document.getElementById('form-header').innerText = "Dodaj Utwór";
     document.getElementById('form-id').value = "";
     document.getElementById('form-title').value = "";
@@ -436,10 +459,10 @@
     document.getElementById('form-lyrics').value = "";
     document.getElementById('form-chords').value = "";
     document.getElementById('btn-delete').classList.add('hidden');
-    showView('view-form');
-  }
+    window.showView('view-form');
+  };
 
-  function editCurrentSong() {
+  window.editCurrentSong = function() {
     const song = songs.find(s => s.id === currentSongId);
     if (!song) return;
 
@@ -447,13 +470,13 @@
     document.getElementById('form-id').value = song.id;
     document.getElementById('form-title').value = song.title;
     document.getElementById('form-category').value = song.category || "";
-    document.getElementById('form-lyrics').value = song.lyrics || "";
+    document.getElementById('form-lyrics').value = song.lyrics || song.text || "";
     document.getElementById('form-chords').value = song.chords || "";
     document.getElementById('btn-delete').classList.remove('hidden');
-    showView('view-form');
-  }
+    window.showView('view-form');
+  };
 
-  function saveSong() {
+  window.saveSong = async function() {
     const id = document.getElementById('form-id').value;
     const title = document.getElementById('form-title').value.trim();
     const category = document.getElementById('form-category').value.trim() || "Uwielbienie";
@@ -462,31 +485,53 @@
 
     if (!title || !lyrics) return alert("Wypełnij tytuł i tekst!");
 
+    const newSong = { title, category, lyrics, chords };
+
+    if (db) {
+      try {
+        if (id) {
+          await updateDoc(doc(db, "songs", id), newSong);
+        } else {
+          const docRef = await addDoc(collection(db, "songs"), newSong);
+          newSong.id = docRef.id;
+        }
+      } catch(e) {
+        console.error("Zapisano lokalnie z powodu braku połączenia.", e);
+      }
+    }
+
     if (id) {
       const idx = songs.findIndex(s => s.id === id);
-      songs[idx] = { id, title, category, lyrics, chords };
+      if (idx !== -1) songs[idx] = { id, ...newSong };
     } else {
-      songs.push({ id: Date.now().toString(), title, category, lyrics, chords });
+      if (!newSong.id) newSong.id = Date.now().toString();
+      songs.push(newSong);
     }
 
     localStorage.setItem('spiewnik_songs', JSON.stringify(songs));
     renderAll();
-    showView('view-home');
-  }
+    window.showView('view-home');
+  };
 
-  function deleteCurrentSong() {
+  window.deleteCurrentSong = async function() {
     const id = document.getElementById('form-id').value;
     if (!id) return;
+
+    if (db) {
+      try { await deleteDoc(doc(db, "songs", id)); } catch(e){}
+    }
+
     songs = songs.filter(s => s.id !== id);
     repertuarIds = repertuarIds.filter(i => i !== id);
     localStorage.setItem('spiewnik_songs', JSON.stringify(songs));
     localStorage.setItem('spiewnik_repertuar', JSON.stringify(repertuarIds));
     renderAll();
-    showView('view-home');
-  }
+    window.showView('view-home');
+  };
 
-  // Inicjalizacja
+  // Start aplikacji
   renderAll();
+  fetchFromFirebase();
 </script>
 
 </body>
