@@ -102,20 +102,20 @@
     <h1>ŚPIEWNIK PSIE POLE</h1>
     <img src="IMG_20260817_103611.jpg" class="banner" alt="Baner Śpiewnik">
 
-    <button class="btn btn-filled" onclick="showView('view-repertuar')">📌 Repertuar</button>
-    <button class="btn btn-filled" onclick="showView('view-archive')">📁 Archiwum Repertuarów</button>
-    <button class="btn btn-filled" onclick="showView('view-songs')">📖 Przeglądaj Śpiewnik</button>
-    <button class="btn" onclick="openAddForm()">➕ Dodaj Utwór</button>
+    <button class="btn btn-filled" onclick="window.showView('view-repertuar')">📌 Repertuar</button>
+    <button class="btn btn-filled" onclick="window.showView('view-archive')">📁 Archiwum Repertuarów</button>
+    <button class="btn btn-filled" onclick="window.showView('view-songs')">📖 Przeglądaj Śpiewnik</button>
+    <button class="btn" onclick="window.openAddForm()">➕ Dodaj Utwór</button>
   </div>
 
   <!-- WIDOK PRZEGLĄDANIA ŚPIEWNIKA -->
   <div id="view-songs" class="hidden">
     <div class="nav-bar">
-      <button class="btn btn-secondary btn-small" onclick="showView('view-home')">⬅️ Powrót</button>
+      <button class="btn btn-secondary btn-small" onclick="window.showView('view-home')">⬅️ Powrót</button>
       <h2>Śpiewnik</h2>
     </div>
 
-    <input type="text" id="search-input" class="input-field" placeholder="🔎 Szukaj po tytule..." oninput="filterSongs()">
+    <input type="text" id="search-input" class="input-field" placeholder="🔎 Szukaj po tytule..." oninput="window.filterSongs()">
 
     <div class="cat-bar" id="categories-bar"></div>
     <div id="all-songs-list"></div>
@@ -124,7 +124,7 @@
   <!-- WIDOK REPERTUARU -->
   <div id="view-repertuar" class="hidden">
     <div class="nav-bar">
-      <button class="btn btn-secondary btn-small" onclick="showView('view-home')">⬅️ Powrót</button>
+      <button class="btn btn-secondary btn-small" onclick="window.showView('view-home')">⬅️ Powrót</button>
       <h2>Bieżący Repertuar</h2>
     </div>
 
@@ -132,14 +132,14 @@
 
     <div style="margin-top: 20px; border-top: 1px solid var(--border); padding-top: 15px;">
       <input type="text" id="archive-name-input" class="input-field" placeholder="Nazwa zestawu (np. Niedziela 10:00)">
-      <button class="btn btn-filled" onclick="saveRepertuarToArchive()">💾 Zapisz do Archiwum</button>
+      <button class="btn btn-filled" onclick="window.saveRepertuarToArchive()">💾 Zapisz do Archiwum</button>
     </div>
   </div>
 
   <!-- WIDOK ARCHIWUM -->
   <div id="view-archive" class="hidden">
     <div class="nav-bar">
-      <button class="btn btn-secondary btn-small" onclick="showView('view-home')">⬅️ Powrót</button>
+      <button class="btn btn-secondary btn-small" onclick="window.showView('view-home')">⬅️ Powrót</button>
       <h2>Archiwum</h2>
     </div>
     <div id="archive-list"></div>
@@ -148,8 +148,8 @@
   <!-- WIDOK JEDNEGO UTWORU -->
   <div id="view-single" class="hidden">
     <div class="nav-bar">
-      <button class="btn btn-secondary btn-small" onclick="goBackFromSong()">⬅️ Powrót</button>
-      <button class="btn btn-secondary btn-small" onclick="editCurrentSong()">✏️ Edytuj</button>
+      <button class="btn btn-secondary btn-small" onclick="window.goBackFromSong()">⬅️ Powrót</button>
+      <button class="btn btn-secondary btn-small" onclick="window.editCurrentSong()">✏️ Edytuj</button>
     </div>
 
     <h2 id="view-title"></h2>
@@ -163,12 +163,12 @@
     </div>
 
     <div class="controls-panel">
-      <button class="btn btn-secondary btn-small" onclick="toggleChords()">🎸 Akordy</button>
-      <button class="btn btn-secondary btn-small" onclick="changeFontSize(2)">A+</button>
-      <button class="btn btn-secondary btn-small" onclick="changeFontSize(-2)">A-</button>
-      <button class="btn btn-secondary btn-small" onclick="transpose(1)">♭/♯ +1</button>
-      <button class="btn btn-secondary btn-small" onclick="transpose(-1)">♭/♯ -1</button>
-      <button class="btn btn-secondary btn-small" id="btn-scroll" onclick="toggleAutoScroll()">📜 Auto Scroll</button>
+      <button class="btn btn-secondary btn-small" onclick="window.toggleChords()">🎸 Akordy</button>
+      <button class="btn btn-secondary btn-small" onclick="window.changeFontSize(2)">A+</button>
+      <button class="btn btn-secondary btn-small" onclick="window.changeFontSize(-2)">A-</button>
+      <button class="btn btn-secondary btn-small" onclick="window.transpose(1)">♭/♯ +1</button>
+      <button class="btn btn-secondary btn-small" onclick="window.transpose(-1)">♭/♯ -1</button>
+      <button class="btn btn-secondary btn-small" id="btn-scroll" onclick="window.toggleAutoScroll()">📜 Auto Scroll</button>
     </div>
 
     <div id="view-chords" class="song-chords"></div>
@@ -178,7 +178,7 @@
   <!-- WIDOK DODAWANIA / EDYCJI -->
   <div id="view-form" class="hidden">
     <div class="nav-bar">
-      <button class="btn btn-secondary btn-small" onclick="showView('view-home')">⬅️ Anuluj</button>
+      <button class="btn btn-secondary btn-small" onclick="window.showView('view-home')">⬅️ Anuluj</button>
       <h2 id="form-header">Dodaj Utwór</h2>
     </div>
 
@@ -196,8 +196,8 @@
       <p id="audio-status" style="font-size: 0.8rem; color: var(--primary); margin-top: 5px;"></p>
     </div>
 
-    <button class="btn btn-filled" id="btn-save" onclick="saveSong()" style="margin-top: 15px;">💾 Zapisz</button>
-    <button class="btn btn-danger hidden" id="btn-delete" onclick="deleteCurrentSong()">🗑️ Usuń Utwór</button>
+    <button class="btn btn-filled" id="btn-save" onclick="window.saveSong()" style="margin-top: 15px;">💾 Zapisz</button>
+    <button class="btn btn-danger hidden" id="btn-delete" onclick="window.deleteCurrentSong()">🗑️ Usuń Utwór</button>
   </div>
 
 </div>
@@ -213,7 +213,7 @@
     storageBucket: "spiewnik-psie-pole.appspot.com"
   };
 
-  const ADMIN_PIN = "1234"; // Zmień na swój własny PIN
+  const ADMIN_PIN = "1234";
 
   let db = null;
   let storage = null;
@@ -344,8 +344,8 @@
           <div style="font-size:0.8rem; color:var(--text-sub)">Pieśni: ${arch.songIds.length}</div>
         </div>
         <div>
-          <button class="btn btn-secondary btn-small" onclick="loadArchive('${arch.id}')">📂 Wczytaj</button>
-          <button class="btn btn-danger btn-small" onclick="deleteArchive('${arch.id}')">🗑️</button>
+          <button class="btn btn-secondary btn-small" onclick="window.loadArchive('${arch.id}')">📂 Wczytaj</button>
+          <button class="btn btn-danger btn-small" onclick="window.deleteArchive('${arch.id}')">🗑️</button>
         </div>
       `;
       container.appendChild(div);
@@ -359,10 +359,10 @@
     const hasAudio = song.audioUrl ? ' 🎵' : '';
 
     div.innerHTML = `
-      <button class="song-title-btn" onclick="openSong('${song.id}')">
+      <button class="song-title-btn" onclick="window.openSong('${song.id}')">
         ${song.title}${hasAudio} <span class="song-category">${song.category || 'Uwielbienie'}</span>
       </button>
-      <button class="btn btn-secondary btn-small" onclick="toggleRepertuar('${song.id}')">
+      <button class="btn btn-secondary btn-small" onclick="window.toggleRepertuar('${song.id}')">
         ${inRep ? '➖' : '➕'}
       </button>
     `;
@@ -386,7 +386,6 @@
     chordsEl.innerText = song.chords || 'Brak akordów.';
     chordsEl.style.display = 'none';
 
-    // Obsługa audio MP3
     const audioContainer = document.getElementById('view-audio-container');
     const audioPlayer = document.getElementById('view-audio-player');
     
@@ -526,8 +525,4 @@
     document.getElementById('form-audio-file').value = "";
     document.getElementById('form-existing-audio-url').value = song.audioUrl || "";
     
-    document.getElementById('audio-status').innerText = song.audioUrl 
-      ? "Załączono już nagranie MP3. Wybierz nowy plik, aby je zastąpić." 
-      : "";
-
-    document.getElemen
+    document.getElementById('audio-status').innerText = song.audio
