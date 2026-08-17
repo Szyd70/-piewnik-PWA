@@ -22,7 +22,6 @@
 
     h1 { color: var(--primary); text-align: center; margin-bottom: 20px; font-size: 1.8rem; }
     
-    /* ZMIENIONO TUTAJ: usunięto height, dodano aspect-ratio */
     .banner { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; border-radius: 12px; margin-bottom: 20px; }
 
     .btn {
@@ -88,6 +87,10 @@
       border-radius: 8px; margin-top: 10px; display: none;
     }
     .controls-panel { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 15px; }
+    
+    audio { width: 100%; margin-top: 15px; border-radius: 8px; }
+    .audio-section { margin-top: 15px; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px; }
+    .audio-section label { display: block; margin-bottom: 5px; font-size: 0.9rem; color: var(--primary); }
   </style>
 </head>
 <body>
@@ -152,6 +155,13 @@
     <h2 id="view-title"></h2>
     <span id="view-category" style="color: var(--primary); font-size: 0.9rem;"></span>
 
+    <!-- ODTWARZACZ AUDIO MP3 -->
+    <div id="view-audio-container" class="hidden">
+      <audio id="view-audio-player" controls>
+        Twoja przeglądarka nie wspiera odtwarzacza audio.
+      </audio>
+    </div>
+
     <div class="controls-panel">
       <button class="btn btn-secondary btn-small" onclick="toggleChords()">🎸 Akordy</button>
       <button class="btn btn-secondary btn-small" onclick="changeFontSize(2)">A+</button>
@@ -173,12 +183,20 @@
     </div>
 
     <input type="hidden" id="form-id">
+    <input type="password" id="form-pin" class="input-field" placeholder="PIN Administratora *" required>
     <input type="text" id="form-title" class="input-field" placeholder="Tytuł utworu *">
     <input type="text" id="form-category" class="input-field" placeholder="Kategoria (np. Uwielbienie, Kolędy)">
     <textarea id="form-lyrics" class="input-field" placeholder="Tekst pieśni *"></textarea>
     <textarea id="form-chords" class="input-field" placeholder="Akordy (opcjonalnie)"></textarea>
 
-    <button class="btn btn-filled" onclick="saveSong()">💾 Zapisz</button>
+    <div class="audio-section">
+      <label for="form-audio-file">🎵 Plik nagrania/audio (MP3):</label>
+      <input type="file" id="form-audio-file" accept="audio/mp3,audio/mpeg" class="input-field" style="margin-bottom: 0;">
+      <input type="hidden" id="form-existing-audio-url">
+      <p id="audio-status" style="font-size: 0.8rem; color: var(--primary); margin-top: 5px;"></p>
+    </div>
+
+    <button class="btn btn-filled" id="btn-save" onclick="saveSong()" style="margin-top: 15px;">💾 Zapisz</button>
     <button class="btn btn-danger hidden" id="btn-delete" onclick="deleteCurrentSong()">🗑️ Usuń Utwór</button>
   </div>
 
@@ -188,13 +206,22 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
-  const firebaseConfig = { projectId: "spiewnik-psie-pole" };
+  const firebaseConfig = { 
+    projectId: "spiewnik-psie-pole",
+    storageBucket: "spiewnik-psie-pole.appspot.com"
+  };
+
+  const ADMIN_PIN = "1234"; // Zmień na swój własny PIN
+
   let db = null;
+  let storage = null;
 
   try {
     const app = initializeApp(firebaseConfig);
     db = getFirestore(app);
+    storage = getStorage(app);
   } catch(e) {
     console.warn("Tryb Offline (brak połączenia z Firebase):", e);
   }
@@ -223,7 +250,7 @@
         renderAll();
       }
     } catch(e) {
-      console.log("Ładowanie z pamięci podręcznej urządzeń.");
+      console.log("Ładowanie z pamięci podręcznej urządzeń.", e);
     }
   }
 
@@ -329,10 +356,11 @@
     const div = document.createElement('div');
     div.className = 'song-item';
     const inRep = repertuarIds.includes(song.id);
+    const hasAudio = song.audioUrl ? ' 🎵' : '';
 
     div.innerHTML = `
       <button class="song-title-btn" onclick="openSong('${song.id}')">
-        ${song.title} <span class="song-category">${song.category || 'Uwielbienie'}</span>
+        ${song.title}${hasAudio} <span class="song-category">${song.category || 'Uwielbienie'}</span>
       </button>
       <button class="btn btn-secondary btn-small" onclick="toggleRepertuar('${song.id}')">
         ${inRep ? '➖' : '➕'}
@@ -358,10 +386,27 @@
     chordsEl.innerText = song.chords || 'Brak akordów.';
     chordsEl.style.display = 'none';
 
+    // Obsługa audio MP3
+    const audioContainer = document.getElementById('view-audio-container');
+    const audioPlayer = document.getElementById('view-audio-player');
+    
+    if (song.audioUrl) {
+      audioPlayer.src = song.audioUrl;
+      audioContainer.classList.remove('hidden');
+    } else {
+      audioPlayer.pause();
+      audioPlayer.src = "";
+      audioContainer.classList.add('hidden');
+    }
+
     window.showView('view-single');
   };
 
-  window.goBackFromSong = function() { window.showView(previousView); };
+  window.goBackFromSong = function() { 
+    const audioPlayer = document.getElementById('view-audio-player');
+    if (audioPlayer) audioPlayer.pause();
+    window.showView(previousView); 
+  };
 
   window.toggleChords = function() {
     const el = document.getElementById('view-chords');
@@ -455,10 +500,14 @@
   window.openAddForm = function() {
     document.getElementById('form-header').innerText = "Dodaj Utwór";
     document.getElementById('form-id').value = "";
+    document.getElementById('form-pin').value = "";
     document.getElementById('form-title').value = "";
     document.getElementById('form-category').value = "";
     document.getElementById('form-lyrics').value = "";
     document.getElementById('form-chords').value = "";
+    document.getElementById('form-audio-file').value = "";
+    document.getElementById('form-existing-audio-url').value = "";
+    document.getElementById('audio-status').innerText = "";
     document.getElementById('btn-delete').classList.add('hidden');
     window.showView('view-form');
   };
@@ -469,71 +518,16 @@
 
     document.getElementById('form-header').innerText = "Edytuj Utwór";
     document.getElementById('form-id').value = song.id;
+    document.getElementById('form-pin').value = "";
     document.getElementById('form-title').value = song.title;
     document.getElementById('form-category').value = song.category || "";
     document.getElementById('form-lyrics').value = song.lyrics || song.text || "";
     document.getElementById('form-chords').value = song.chords || "";
-    document.getElementById('btn-delete').classList.remove('hidden');
-    window.showView('view-form');
-  };
+    document.getElementById('form-audio-file').value = "";
+    document.getElementById('form-existing-audio-url').value = song.audioUrl || "";
+    
+    document.getElementById('audio-status').innerText = song.audioUrl 
+      ? "Załączono już nagranie MP3. Wybierz nowy plik, aby je zastąpić." 
+      : "";
 
-  window.saveSong = async function() {
-    const id = document.getElementById('form-id').value;
-    const title = document.getElementById('form-title').value.trim();
-    const category = document.getElementById('form-category').value.trim() || "Uwielbienie";
-    const lyrics = document.getElementById('form-lyrics').value.trim();
-    const chords = document.getElementById('form-chords').value.trim();
-
-    if (!title || !lyrics) return alert("Wypełnij tytuł i tekst!");
-
-    const newSong = { title, category, lyrics, chords };
-
-    if (db) {
-      try {
-        if (id) {
-          await updateDoc(doc(db, "songs", id), newSong);
-        } else {
-          const docRef = await addDoc(collection(db, "songs"), newSong);
-          newSong.id = docRef.id;
-        }
-      } catch(e) {
-        console.error("Zapisano lokalnie z powodu braku połączenia.", e);
-      }
-    }
-
-    if (id) {
-      const idx = songs.findIndex(s => s.id === id);
-      if (idx !== -1) songs[idx] = { id, ...newSong };
-    } else {
-      if (!newSong.id) newSong.id = Date.now().toString();
-      songs.push(newSong);
-    }
-
-    localStorage.setItem('spiewnik_songs', JSON.stringify(songs));
-    renderAll();
-    window.showView('view-home');
-  };
-
-  window.deleteCurrentSong = async function() {
-    const id = document.getElementById('form-id').value;
-    if (!id) return;
-
-    if (db) {
-      try { await deleteDoc(doc(db, "songs", id)); } catch(e){}
-    }
-
-    songs = songs.filter(s => s.id !== id);
-    repertuarIds = repertuarIds.filter(i => i !== id);
-    localStorage.setItem('spiewnik_songs', JSON.stringify(songs));
-    localStorage.setItem('spiewnik_repertuar', JSON.stringify(repertuarIds));
-    renderAll();
-    window.showView('view-home');
-  };
-
-  // Start aplikacji
-  renderAll();
-  fetchFromFirebase();
-</script>
-
-</body>
-</html>
+    document.getElemen
