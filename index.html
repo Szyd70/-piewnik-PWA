@@ -151,12 +151,11 @@
     <h2 id="view-title"></h2>
     <span id="view-category" style="color: var(--primary); font-size: 0.9rem;"></span>
 
-    <!-- ODTWARZACZ AUDIO BEZPOŚREDNIO NA STRONIE -->
-    <div id="view-audio-container" class="hidden" style="margin-top: 15px; background: var(--card-bg); border: 1px solid var(--border); padding: 12px; border-radius: 10px;">
-      <audio id="view-audio-player" controls style="width: 100%; margin-bottom: 8px;">
-        Twoja przeglądarka nie obsługuje odtwarzania audio.
-      </audio>
-      <a id="view-audio-link" href="#" target="_blank" style="display: block; text-align: center; color: var(--primary); font-size: 0.85rem; text-decoration: none;">🔗 Otwórz plik w nowym oknie</a>
+    <!-- PRZYCISK OTWIERAJĄCY NAGRANIE (ZAMIAST SZAREGO ODTWARZACZA) -->
+    <div id="view-audio-container" class="hidden" style="margin-top: 15px;">
+      <a id="view-audio-btn" href="#" target="_blank" class="btn btn-filled" style="background-color: #2a9d8f; border-color: #2a9d8f; color: #fff; margin-bottom: 0;">
+        🎵 Włącz nagranie audio
+      </a>
     </div>
 
     <div class="controls-panel">
@@ -182,7 +181,7 @@
     <input type="hidden" id="form-id">
     <input type="text" id="form-title" class="input-field" placeholder="Tytuł utworu *">
     <input type="text" id="form-category" class="input-field" placeholder="Kategoria (np. Uwielbienie, Kolędy)">
-    <input type="text" id="form-audio-url" class="input-field" placeholder="Link do nagrania MP3 / MP2 (opcjonalnie)">
+    <input type="text" id="form-audio-url" class="input-field" placeholder="Link do nagrania (Vocaroo / MP3)">
     <textarea id="form-lyrics" class="input-field" placeholder="Tekst pieśni *"></textarea>
     <textarea id="form-chords" class="input-field" placeholder="Akordy (opcjonalnie)"></textarea>
 
@@ -246,13 +245,6 @@
 
   window.showView = function(viewId) {
     stopAutoScroll();
-    // Bezpieczne zatrzymanie odtwarzacza po wyjściu z widoku utworu
-    const audioPlayer = document.getElementById('view-audio-player');
-    if (audioPlayer) {
-      audioPlayer.pause();
-      audioPlayer.src = "";
-    }
-
     document.querySelectorAll('.container > div').forEach(div => div.classList.add('hidden'));
     const target = document.getElementById(viewId);
     if (target) target.classList.remove('hidden');
@@ -383,19 +375,15 @@
     chordsEl.innerText = song.chords || 'Brak akordów.';
     chordsEl.style.display = 'none';
 
-    // OBSŁUGA ODTWARZACZA AUDIO
+    // OBSŁUGA PRZYCISKU AUDIO
     const audioContainer = document.getElementById('view-audio-container');
-    const audioPlayer = document.getElementById('view-audio-player');
-    const audioLink = document.getElementById('view-audio-link');
+    const audioBtn = document.getElementById('view-audio-btn');
     
     if (song.audioUrl && song.audioUrl.trim() !== '') {
-      audioPlayer.src = song.audioUrl.trim();
-      audioLink.href = song.audioUrl.trim();
+      audioBtn.href = song.audioUrl.trim();
       audioContainer.classList.remove('hidden');
     } else {
-      audioPlayer.pause();
-      audioPlayer.src = "";
-      audioLink.href = '#';
+      audioBtn.href = '#';
       audioContainer.classList.add('hidden');
     }
 
@@ -556,7 +544,12 @@
 
     localStorage.setItem('spiewnik_songs', JSON.stringify(songs));
     renderAll();
-    showView('view-home');
+    
+    if (id && currentSongId === id) {
+      openSong(id);
+    } else {
+      showView('view-home');
+    }
   };
 
   window.deleteCurrentSong = async function() {
