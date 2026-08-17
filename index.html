@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pl">
 <head>
@@ -191,7 +190,7 @@
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  import { getFirestore, collection, addDoc, getDocs, doc, setDoc, getDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
   const firebaseConfig = {
     projectId: "spiewnik-psie-pole"
@@ -223,9 +222,10 @@
     return pin === ADMIN_PIN;
   }
 
-  async function fetchFromFirebase() {
+  async function syncDataFromFirebase() {
     if (!db) return;
     try {
+      // Pobieranie pieśni
       const querySnapshot = await getDocs(collection(db, "songs"));
       if (!querySnapshot.empty) {
         const fetched = [];
@@ -234,8 +234,23 @@
         });
         songs = fetched;
         localStorage.setItem('spiewnik_songs', JSON.stringify(songs));
-        renderAll();
       }
+
+      // Pobieranie wspólnego repertuaru
+      const repDoc = await getDoc(doc(db, "settings", "current_repertuar"));
+      if (repDoc.exists()) {
+        repertuarIds = repDoc.data().songIds || [];
+        localStorage.setItem('spiewnik_repertuar', JSON.stringify(repertuarIds));
+      }
+
+      // Pobieranie archiwów
+      const archDoc = await getDoc(doc(db, "settings", "archives"));
+      if (archDoc.exists()) {
+        archives = archDoc.data().list || [];
+        localStorage.setItem('spiewnik_archives', JSON.stringify(archives));
+      }
+
+      renderAll();
     } catch (e) {
       console.log("Błąd pobierania z Firebase (działam lokalnie):", e);
     }
@@ -432,39 +447,70 @@
     if (btn) btn.innerText = "📜 Auto Scroll";
   }
 
-  window.toggleRepertuar = function(id) {
+  window.toggleRepertuar = async function(id) {
     if (repertuarIds.includes(id)) {
       repertuarIds = repertuarIds.filter(i => i !== id);
     } else {
       repertuarIds.push(id);
     }
     localStorage.setItem('spiewnik_repertuar', JSON.stringify(repertuarIds));
+    
+    if (db) {
+      try {
+        await setDoc(doc(db, "settings", "current_repertuar"), { songIds: repertuarIds });
+      } catch (e) {
+        console.error("Błąd zapisu repertuaru w chmurze:", e);
+      }
+    }
     renderAll();
   };
 
-  window.saveRepertuarToArchive = function() {
+  window.saveRepertuarToArchive = async function() {
     const input = document.getElementById('archive-name-input');
     const name = input.value.trim();
     if (!name || repertuarIds.length === 0) return alert("Wpisz nazwę zestawu!");
 
     archives.push({ id: Date.now().toString(), name, songIds: [...repertuarIds] });
     localStorage.setItem('spiewnik_archives', JSON.stringify(archives));
+    
+    if (db) {
+      try {
+        await setDoc(doc(db, "settings", "archives"), { list: archives });
+      } catch (e) {
+        console.error("Błąd zapisu archiwum w chmurze:", e);
+      }
+    }
+
     input.value = '';
     renderAll();
   };
 
-  window.loadArchive = function(id) {
+  window.loadArchive = async function(id) {
     const arch = archives.find(a => a.id === id);
     if (!arch) return;
     repertuarIds = [...arch.songIds];
     localStorage.setItem('spiewnik_repertuar', JSON.stringify(repertuarIds));
+    
+    if (db) {
+      try {
+        await setDoc(doc(db, "settings", "current_repertuar"), { songIds: repertuarIds });
+      } catch (e) {}
+    }
+
     renderAll();
     showView('view-repertuar');
   };
 
-  window.deleteArchive = function(id) {
+  window.deleteArchive = async function(id) {
     archives = archives.filter(a => a.id !== id);
     localStorage.setItem('spiewnik_archives', JSON.stringify(archives));
+    
+    if (db) {
+      try {
+        await setDoc(doc(db, "settings", "archives"), { list: archives });
+      } catch (e) {}
+    }
+
     renderAll();
   };
 
@@ -508,61 +554,4 @@
 
   window.saveSong = async function() {
     const id = document.getElementById('form-id').value;
-    const title = document.getElementById('form-title').value.trim();
-    const category = document.getElementById('form-category').value.trim() || "Uwielbienie";
-    const audioUrl = document.getElementById('form-audio-url').value.trim();
-    const lyrics = document.getElementById('form-lyrics').value.trim();
-    const chords = document.getElementById('form-chords').value.trim();
-
-    if (!title || !lyrics) return alert("Wypełnij tytuł i tekst!");
-
-    const songData = { title, category, audioUrl, lyrics, chords };
-
-    if (db) {
-      try {
-        if (id) {
-          await updateDoc(doc(db, "songs", id), songData);
-        } else {
-          const docRef = await addDoc(collection(db, "songs"), songData);
-          songData.id = docRef.id;
-        }
-      } catch (e) {
-        console.error("Błąd zapisu w chmurze:", e);
-      }
-    }
-
-    if (id) {
-      const idx = songs.findIndex(s => s.id === id);
-      if (idx !== -1) songs[idx] = { id, ...songData };
-    } else {
-      if (!songData.id) songData.id = Date.now().toString();
-      songs.push(songData);
-    }
-
-    localStorage.setItem('spiewnik_songs', JSON.stringify(songs));
-    renderAll();
-    showView('view-home');
-  };
-
-  window.deleteCurrentSong = async function() {
-    const id = document.getElementById('form-id').value;
-    if (!id) return;
-
-    if (db) {
-      try { await deleteDoc(doc(db, "songs", id)); } catch(e){}
-    }
-
-    songs = songs.filter(s => s.id !== id);
-    repertuarIds = repertuarIds.filter(i => i !== id);
-    localStorage.setItem('spiewnik_songs', JSON.stringify(songs));
-    localStorage.setItem('spiewnik_repertuar', JSON.stringify(repertuarIds));
-    renderAll();
-    showView('view-home');
-  };
-
-  renderAll();
-  fetchFromFirebase();
-</script>
-
-</body>
-</html>
+    const title = document.getElementById
