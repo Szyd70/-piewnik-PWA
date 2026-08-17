@@ -39,6 +39,7 @@
       align-items: center;
       justify-content: center;
       gap: 10px;
+      text-decoration: none;
     }
     .btn-filled { background-color: var(--primary); color: var(--bg); }
     .btn-secondary { background-color: transparent; border-color: var(--border); color: var(--text); }
@@ -88,7 +89,6 @@
     }
     .controls-panel { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 15px; }
     
-    audio { width: 100%; margin-top: 10px; border-radius: 8px; }
     .audio-section { margin-top: 5px; margin-bottom: 5px; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px; }
     .audio-section label { display: block; margin-bottom: 5px; font-size: 0.9rem; color: var(--primary); }
     .audio-hint { font-size: 0.75rem; color: var(--text-sub); margin-top: 4px; display: block; }
@@ -149,18 +149,16 @@
   <!-- WIDOK JEDNEGO UTWORU -->
   <div id="view-single" class="hidden">
     <div class="nav-bar">
-      <button class="btn btn-secondary btn-small" onclick="goBackFromSong()">⬅️ Powrót</button>
+      <button class="btn btn-secondary btn-small" onclick="showView(previousView)">⬅️ Powrót</button>
       <button class="btn btn-secondary btn-small" onclick="editCurrentSong()">✏️ Edytuj 🔒</button>
     </div>
 
     <h2 id="view-title"></h2>
     <span id="view-category" style="color: var(--primary); font-size: 0.9rem;"></span>
 
-    <!-- ODTWARZACZ AUDIO -->
-    <div id="view-audio-container" class="hidden">
-      <audio id="view-audio-player" controls preload="none">
-        Twoja przeglądarka nie wspiera odtwarzacza audio.
-      </audio>
+    <!-- BEZPIECZNY PRZYCISK AUDIO (OTWIERA NAGRANIE) -->
+    <div id="view-audio-container" class="hidden" style="margin-top: 15px;">
+      <a id="view-audio-link" href="#" target="_blank" class="btn btn-filled" style="margin-bottom: 0;">🎵 Odtwórz / Pobierz nagranie MP3</a>
     </div>
 
     <div class="controls-panel">
@@ -190,7 +188,7 @@
     <div class="audio-section">
       <label for="form-audio-url">🎵 Link do nagrania MP3:</label>
       <input type="text" id="form-audio-url" class="input-field" placeholder="https://..." style="margin-bottom:0;">
-      <span class="audio-hint">Wklej bezpośredni link do pliku MP3 lub link udostępniania z Dysku Google.</span>
+      <span class="audio-hint">Wklej link do pliku MP3 lub link z Dysku Google.</span>
     </div>
 
     <textarea id="form-lyrics" class="input-field" placeholder="Tekst pieśni *" style="margin-top: 12px;"></textarea>
@@ -252,12 +250,6 @@
 
   window.showView = function(viewId) {
     stopAutoScroll();
-    const audioPlayer = document.getElementById('view-audio-player');
-    if (audioPlayer) {
-      audioPlayer.pause();
-      audioPlayer.src = "";
-    }
-
     document.querySelectorAll('.container > div').forEach(div => div.classList.add('hidden'));
     const target = document.getElementById(viewId);
     if (target) target.classList.remove('hidden');
@@ -389,29 +381,17 @@
     chordsEl.style.display = 'none';
 
     const audioContainer = document.getElementById('view-audio-container');
-    const audioPlayer = document.getElementById('view-audio-player');
+    const audioLink = document.getElementById('view-audio-link');
     
     if (song.audioUrl && song.audioUrl.trim() !== '') {
-      let finalUrl = song.audioUrl.trim();
-      if (finalUrl.includes('drive.google.com')) {
-        const match = finalUrl.match(/\/d\/([^\/]+)/) || finalUrl.match(/id=([^&]+)/);
-        if (match && match[1]) {
-          finalUrl = `https://drive.google.com/uc?export=download&id=${match[1]}`;
-        }
-      }
-      audioPlayer.src = finalUrl;
+      audioLink.href = song.audioUrl.trim();
       audioContainer.classList.remove('hidden');
     } else {
-      audioPlayer.pause();
-      audioPlayer.src = '';
+      audioLink.href = '#';
       audioContainer.classList.add('hidden');
     }
 
     showView('view-single');
-  };
-
-  window.goBackFromSong = function() { 
-    showView(previousView); 
   };
 
   window.toggleChords = function() {
@@ -538,4 +518,25 @@
     const title = document.getElementById('form-title').value.trim();
     const category = document.getElementById('form-category').value.trim() || "Uwielbienie";
     const audioUrl = document.getElementById('form-audio-url').value.trim();
-    const lyrics = document.getElementById('form-lyric
+    const lyrics = document.getElementById('form-lyrics').value.trim();
+    const chords = document.getElementById('form-chords').value.trim();
+
+    if (!title || !lyrics) return alert("Wypełnij tytuł i tekst!");
+
+    const newSong = { title, category, audioUrl, lyrics, chords };
+
+    if (db) {
+      try {
+        if (id) {
+          await updateDoc(doc(db, "songs", id), newSong);
+        } else {
+          const docRef = await addDoc(collection(db, "songs"), newSong);
+          newSong.id = docRef.id;
+        }
+      } catch(e) {
+        console.error("Zapis lokalny.", e);
+      }
+    }
+
+    if (id) {
+   
