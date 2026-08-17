@@ -219,13 +219,13 @@
 <body>
 
 <div class="container">
-  <header>
-    <h1>Śpiewnik Psie Pole</h1>
-    <img src="https://media.istockphoto.com/id/2161124245/photo/christians-raising-their-hands-in-praise-and-worship-at-a-night-music-concert.jpg?s=612x612&w=0&k=20&c=2Lt_xDFW_Wt4V20K_BA2fH43ta9hBbQP_y6NfvBjjI0=" alt="Uwielbienie" class="hero-img">
-  </header>
 
   <!-- MENU GŁÓWNE -->
   <div id="home-view">
+    <header>
+      <h1>Śpiewnik Psie Pole</h1>
+      <img src="https://media.istockphoto.com/id/2161124245/photo/christians-raising-their-hands-in-praise-and-worship-at-a-night-music-concert.jpg?s=612x612&w=0&k=20&c=2Lt_xDFW_Wt4V20K_BA2fH43ta9hBbQP_y6NfvBjjI0=" alt="Uwielbienie" class="hero-img">
+    </header>
     <button class="btn" onclick="showView('repertuar-view')">📌 Repertuar</button>
     <button class="btn" onclick="showView('songs-list-view')">📖 Przeglądaj Śpiewnik</button>
     <button class="btn btn-secondary" onclick="openAddForm()">➕ Dodaj Utwór</button>
@@ -245,14 +245,7 @@
     <input type="text" id="search-input" class="search-box" placeholder="🔍 Szukaj utworu..." oninput="filterSongs()">
     
     <!-- PODZIAŁ NA KATEGORIE -->
-    <div class="categories-bar">
-      <button class="cat-chip active" onclick="filterCategory('Wszystkie', this)">Wszystkie</button>
-      <button class="cat-chip" onclick="filterCategory('Uwielbienie', this)">Uwielbienie</button>
-      <button class="cat-chip" onclick="filterCategory('Liturgiczne', this)">Liturgiczne</button>
-      <button class="cat-chip" onclick="filterCategory('Oazowe', this)">Oazowe</button>
-      <button class="cat-chip" onclick="filterCategory('Maryjne', this)">Maryjne</button>
-      <button class="cat-chip" onclick="filterCategory('Inne', this)">Inne</button>
-    </div>
+    <div id="categories-bar" class="categories-bar"></div>
 
     <div id="all-songs-list">Ładowanie pieśni...</div>
   </div>
@@ -281,13 +274,9 @@
     <input type="hidden" id="song-id">
     <input type="text" id="song-title" placeholder="Tytuł utworu *" required>
     
-    <select id="song-category">
-      <option value="Uwielbienie">Uwielbienie</option>
-      <option value="Liturgiczne">Liturgiczne</option>
-      <option value="Oazowe">Oazowe</option>
-      <option value="Maryjne">Maryjne</option>
-      <option value="Inne">Inne</option>
-    </select>
+    <label style="font-size: 0.85rem; color: var(--text-sub); display: block; margin-bottom: 4px;">Kategoria (wybierz lub wpisz nową):</label>
+    <input type="text" id="song-category" list="categories-datalist" placeholder="np. Uwielbienie..." value="Uwielbienie">
+    <datalist id="categories-datalist"></datalist>
 
     <textarea id="song-lyrics" rows="8" placeholder="Tekst pieśni *" required></textarea>
     <textarea id="song-chords" rows="3" placeholder="Akordy / Chwyty (opcjonalnie)"></textarea>
@@ -335,9 +324,50 @@
     }
   }
 
+  function getUniqueCategories() {
+    const cats = new Set(['Uwielbienie']);
+    allSongs.forEach(s => {
+      if (s.category && s.category.trim() !== '') {
+        cats.add(s.category.trim());
+      }
+    });
+    return Array.from(cats);
+  }
+
   function renderAll() {
+    renderCategoryChips();
+    renderDatalist();
     renderSongsList();
     renderRepertuar();
+  }
+
+  function renderCategoryChips() {
+    const container = document.getElementById('categories-bar');
+    container.innerHTML = '';
+
+    const categories = ['Wszystkie', ...getUniqueCategories()];
+
+    categories.forEach(cat => {
+      const btn = document.createElement('button');
+      btn.className = `cat-chip ${activeCategory === cat ? 'active' : ''}`;
+      btn.innerText = cat;
+      btn.onclick = () => {
+        activeCategory = cat;
+        renderCategoryChips();
+        renderSongsList();
+      };
+      container.appendChild(btn);
+    });
+  }
+
+  function renderDatalist() {
+    const datalist = document.getElementById('categories-datalist');
+    datalist.innerHTML = '';
+    getUniqueCategories().forEach(cat => {
+      const opt = document.createElement('option');
+      opt.value = cat;
+      datalist.appendChild(opt);
+    });
   }
 
   function renderSongsList() {
@@ -346,7 +376,7 @@
 
     let filtered = allSongs;
     if (activeCategory !== 'Wszystkie') {
-      filtered = allSongs.filter(s => s.category === activeCategory);
+      filtered = allSongs.filter(s => (s.category || 'Uwielbienie') === activeCategory);
     }
 
     if (filtered.length === 0) {
@@ -382,7 +412,7 @@
 
     div.innerHTML = `
       <button class="song-title-btn" onclick="openSong('${song.id}')">
-        ${song.title} <span class="song-category">${song.category || 'Ogólne'}</span>
+        ${song.title} <span class="song-category">${song.category || 'Uwielbienie'}</span>
       </button>
       <button class="btn-add-repertuar" onclick="toggleRepertuar('${song.id}')">
         ${isInRepertuar ? '➖' : '➕'}
@@ -405,9 +435,7 @@
     }
 
     document.getElementById('view-song-title').innerText = song.title;
-    document.getElementById('view-song-category').innerText = song.category || 'Ogólne';
-    
-    // Zabezpieczenie przed inną nazwą zmiennej tekstu w bazie
+    document.getElementById('view-song-category').innerText = song.category || 'Uwielbienie';
     document.getElementById('view-song-lyrics').innerText = song.lyrics || song.text || 'Brak tekstu.';
     
     const chordsEl = document.getElementById('view-song-chords');
@@ -441,13 +469,6 @@
     renderAll();
   };
 
-  window.filterCategory = function(cat, btn) {
-    activeCategory = cat;
-    document.querySelectorAll('.cat-chip').forEach(c => c.classList.remove('active'));
-    btn.classList.add('active');
-    renderSongsList();
-  };
-
   window.filterSongs = function() {
     const query = document.getElementById('search-input').value.toLowerCase();
     const rows = document.querySelectorAll('#all-songs-list .song-item');
@@ -460,6 +481,7 @@
     document.getElementById('form-title').innerText = "Dodaj Utwór";
     document.getElementById('song-id').value = "";
     document.getElementById('song-title').value = "";
+    document.getElementById('song-category').value = "Uwielbienie";
     document.getElementById('song-lyrics').value = "";
     document.getElementById('song-chords').value = "";
     document.getElementById('song-mp3').value = "";
@@ -494,7 +516,7 @@
   window.saveSong = async function() {
     const id = document.getElementById('song-id').value;
     const title = document.getElementById('song-title').value.trim();
-    const category = document.getElementById('song-category').value;
+    const category = document.getElementById('song-category').value.trim() || "Uwielbienie";
     const lyrics = document.getElementById('song-lyrics').value.trim();
     const chords = document.getElementById('song-chords').value.trim();
     const mp3 = document.getElementById('song-mp3').value.trim();
