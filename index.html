@@ -14,13 +14,26 @@
       --text: #ffffff;
       --text-sub: #8d99ae;
       --border: #3a506b;
+      --chords-bg: rgba(0,0,0,0.3);
+    }
+
+    [data-theme="light"] {
+      --bg: #f0f4f8;
+      --card-bg: #ffffff;
+      --primary: #0077b6;
+      --accent: #d90429;
+      --text: #212529;
+      --text-sub: #6c757d;
+      --border: #ced4da;
+      --chords-bg: rgba(0,0,0,0.05);
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
-    body { background-color: var(--bg); color: var(--text); padding: 16px; display: flex; justify-content: center; }
+    body { background-color: var(--bg); color: var(--text); padding: 16px; display: flex; justify-content: center; transition: background 0.3s, color 0.3s; }
     .container { width: 100%; max-width: 500px; }
 
-    h1 { color: var(--primary); text-align: center; margin-bottom: 20px; font-size: 1.8rem; }
+    .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    h1 { color: var(--primary); font-size: 1.8rem; }
     .banner { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; border-radius: 12px; margin-bottom: 20px; }
 
     .btn {
@@ -41,6 +54,7 @@
       text-decoration: none;
     }
     .btn-filled { background-color: var(--primary); color: var(--bg); }
+    [data-theme="light"] .btn-filled { color: #ffffff; }
     .btn-secondary { background-color: transparent; border-color: var(--border); color: var(--text); }
     .btn-danger { border-color: var(--accent); color: var(--accent); }
     .btn-small { width: auto; padding: 6px 12px; font-size: 0.9rem; margin-bottom: 0; }
@@ -80,11 +94,12 @@
       padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; white-space: nowrap; cursor: pointer;
     }
     .cat-chip.active { background: var(--primary); color: var(--bg); font-weight: bold; }
+    [data-theme="light"] .cat-chip.active { color: #ffffff; }
 
     .song-lyrics { white-space: pre-wrap; font-size: 1.1rem; line-height: 1.6; margin-top: 15px; }
     .song-chords {
       white-space: pre-wrap; font-family: monospace; font-size: 1.1rem;
-      color: var(--primary); background: rgba(0,0,0,0.3); padding: 10px;
+      color: var(--primary); background: var(--chords-bg); padding: 10px;
       border-radius: 8px; margin-top: 10px; display: none;
     }
     .controls-panel { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 15px; }
@@ -96,7 +111,10 @@
 
   <!-- WIDOK GŁÓWNY -->
   <div id="view-home">
-    <h1>ŚPIEWNIK PSIE POLE</h1>
+    <div class="header-top">
+      <h1>ŚPIEWNIK PSIE POLE</h1>
+      <button class="btn btn-secondary btn-small" onclick="toggleTheme()" id="theme-btn">☀️ Jasny</button>
+    </div>
     <img src="IMG_20260817_103611.jpg" class="banner" alt="Baner Śpiewnik">
 
     <button class="btn btn-filled" onclick="showView('view-repertuar')">📌 Repertuar</button>
@@ -146,7 +164,7 @@
   <!-- WIDOK JEDNEGO UTWORU -->
   <div id="view-single" class="hidden">
     <div class="nav-bar">
-      <button class="btn btn-secondary btn-small" onclick="showView(previousView)">⬅️ Powrót</button>
+      <button class="btn btn-secondary btn-small" onclick="goBackFromSong()">⬅️ Powrót</button>
       <button class="btn btn-secondary btn-small" onclick="editCurrentSong()">✏️ Edytuj 🔒</button>
     </div>
 
@@ -199,14 +217,13 @@
     </div>
 
     <p style="font-size: 0.85rem; color: var(--text-sub); margin-bottom: 10px;">
-      Szablon:<br>
-      <code style="color: var(--primary);">=== Tytuł (Kategoria) ===</code><br>
-      <code style="color: var(--primary);">[tekst]</code> Treść...<br>
-      <code style="color: var(--primary);">[akordy]</code> C G a F<br>
-      <code style="color: var(--primary);">[audio]</code> Link URL
+      Szablon (Tytuł i czysty tekst):<br>
+      <code style="color: var(--primary);">=== Tytuł Pieśni (Kategoria) ===</code><br>
+      <code style="color: var(--primary);">Linijka tekstu pierwsza</code><br>
+      <code style="color: var(--primary);">Linijka tekstu druga...</code>
     </p>
 
-    <textarea id="form-bulk-text" class="input-field" placeholder="Wklej tutaj pieśni według szablonu..."></textarea>
+    <textarea id="form-bulk-text" class="input-field" placeholder="=== Tytuł 1 (Kategoria) ===&#10;Tekst pierwszej pieśni...&#10;&#10;=== Tytuł 2 ===&#10;Tekst drugiej pieśni..."></textarea>
 
     <button class="btn btn-filled" onclick="processBulkImport()">📥 Importuj wszystko</button>
   </div>
@@ -241,6 +258,26 @@
 
   const ADMIN_PIN = "1234";
   const chromaticScale = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+
+  // Inicjalizacja motywu
+  const savedTheme = localStorage.getItem('spiewnik_theme') || 'dark';
+  if (savedTheme === 'light') {
+    document.documentElement.setAttribute('data-theme', 'light');
+    document.getElementById('theme-btn').innerText = "🌙 Ciemny";
+  }
+
+  window.toggleTheme = function() {
+    const current = document.documentElement.getAttribute('data-theme');
+    if (current === 'light') {
+      document.documentElement.removeAttribute('data-theme');
+      localStorage.setItem('spiewnik_theme', 'dark');
+      document.getElementById('theme-btn').innerText = "☀️ Jasny";
+    } else {
+      document.documentElement.setAttribute('data-theme', 'light');
+      localStorage.setItem('spiewnik_theme', 'light');
+      document.getElementById('theme-btn').innerText = "🌙 Ciemny";
+    }
+  };
 
   function checkAdminAccess() {
     const pin = prompt("Wprowadź kod PIN:");
@@ -385,6 +422,8 @@
     if (!song) return;
 
     currentSongId = id;
+    
+    // Zapamiętujemy z którego widoku wchodzimy, żeby przycisk Powrót działał poprawnie
     if (!document.getElementById('view-songs').classList.contains('hidden')) previousView = 'view-songs';
     else if (!document.getElementById('view-repertuar').classList.contains('hidden')) previousView = 'view-repertuar';
     else previousView = 'view-home';
@@ -409,6 +448,10 @@
     }
 
     showView('view-single');
+  };
+
+  window.goBackFromSong = function() {
+    showView(previousView);
   };
 
   window.toggleChords = function() {
@@ -583,7 +626,7 @@
     const rawText = document.getElementById('form-bulk-text').value.trim();
     if (!rawText) return alert("Wklej dane do importu!");
 
-    // Dzielenie po nagłówkach === Tytuł (Kategoria) ===
+    // Dzielenie bloku po nagłówkach === Tytuł ===
     const blocks = rawText.split(/(?====\s)/);
     let addedCount = 0;
 
@@ -600,30 +643,11 @@
       const title = match[1].trim();
       const category = match[2] ? match[2].trim() : "Uwielbienie";
 
-      let body = lines.slice(1).join('\n');
-
-      let lyrics = "";
-      let chords = "";
-      let audioUrl = "";
-
-      const parts = body.split(/(?=\[(?:tekst|akordy|audio)\])/i);
-      for (let part of parts) {
-        part = part.trim();
-        if (part.toLowerCase().startsWith('[tekst]')) {
-          lyrics = part.replace(/^\[tekst\]\s*/i, '').trim();
-        } else if (part.toLowerCase().startsWith('[akordy]')) {
-          chords = part.replace(/^\[akordy\]\s*/i, '').trim();
-        } else if (part.toLowerCase().startsWith('[audio]')) {
-          audioUrl = part.replace(/^\[audio\]\s*/i, '').trim();
-        }
-      }
-
-      if (!lyrics && body && !body.includes('[')) {
-        lyrics = body.trim();
-      }
+      // Wszystko po nagłówku to czysty tekst pieśni
+      const lyrics = lines.slice(1).join('\n').trim();
 
       if (title && lyrics) {
-        const songData = { title, category, audioUrl, lyrics, chords };
+        const songData = { title, category, audioUrl: "", lyrics, chords: "" };
         
         if (db) {
           try {
@@ -647,7 +671,7 @@
       alert(`Pomyślnie zaimportowano ${addedCount} utworów!`);
       showView('view-home');
     } else {
-      alert("Nie udało się sparsować żadnego utworu. Sprawdź poprawność szablonu.");
+      alert("Nie udało się sparsować żadnego utworu. Sprawdź, czy nagłówki zaczynają się od === Tytuł ===");
     }
   };
 
