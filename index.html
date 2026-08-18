@@ -217,15 +217,15 @@
     </div>
 
     <p style="font-size: 0.85rem; color: var(--text-sub); margin-bottom: 10px;">
-      Format z opcjonalnymi akordami:<br>
-      <code style="color: var(--primary);"># Tytuł Pieśni [Kategoria]</code><br>
+      Format (tytuł zaczyna się od cudzysłowu):<br>
+      <code style="color: var(--primary);">"Nazwa Pieśni" [Kategoria]</code><br>
       <code style="color: var(--primary);"># Tekst</code><br>
       <code style="color: var(--primary);">Linijka tekstu...</code><br>
       <code style="color: var(--primary);"># Akordy</code><br>
       <code style="color: var(--primary);">G D e C</code>
     </p>
 
-    <textarea id="form-bulk-text" class="input-field" placeholder="# Tytuł [Uwielbienie]&#10;# Tekst&#10;Tekst pieśni...&#10;&#10;# Akordy&#10;G D e C"></textarea>
+    <textarea id="form-bulk-text" class="input-field" placeholder="&quot;Nazwa Pieśni&quot; [Uwielbienie]&#10;# Tekst&#10;Tekst pieśni...&#10;&#10;# Akordy&#10;G D e C"></textarea>
 
     <button class="btn btn-filled" onclick="processBulkImport()">📥 Importuj wszystko</button>
   </div>
@@ -544,7 +544,6 @@
 
   window.openAddForm = function() {
     if (!checkAdminAccess()) return;
-
     document.getElementById('form-header').innerText = "Dodaj Utwór";
     document.getElementById('form-id').value = "";
     document.getElementById('form-title').value = "";
@@ -556,15 +555,8 @@
     showView('view-form');
   };
 
-  window.openBulkForm = function() {
-    if (!checkAdminAccess()) return;
-    document.getElementById('form-bulk-text').value = "";
-    showView('view-bulk');
-  };
-
   window.editCurrentSong = function() {
     if (!checkAdminAccess()) return;
-
     const song = songs.find(s => s.id === currentSongId);
     if (!song) return;
 
@@ -587,129 +579,141 @@
     const lyrics = document.getElementById('form-lyrics').value.trim();
     const chords = document.getElementById('form-chords').value.trim();
 
-    if (!title || !lyrics) return alert("Wypełnij tytuł i tekst!");
+    if (!title || !lyrics) return alert("Wypełnij tytuł oraz tekst utworu!");
 
     const songData = { title, category, audioUrl, lyrics, chords };
 
-    if (db) {
-      try {
-        if (id) {
-          await updateDoc(doc(db, "songs", id), songData);
-        } else {
-          const docRef = await addDoc(collection(db, "songs"), songData);
-          songData.id = docRef.id;
-        }
-      } catch (e) {
-        console.error("Błąd zapisu w chmurze:", e);
-      }
-    }
-
     if (id) {
       const idx = songs.findIndex(s => s.id === id);
-      if (idx !== -1) songs[idx] = { id, ...songData };
+      if (idx !== -1) songs[idx] = { ...songs[idx], ...songData };
+      if (db && !id.startsWith("17")) {
+        try { await updateDoc(doc(db, "songs", id), songData); } catch(e){console.error(e);}
+      }
     } else {
-      if (!songData.id) songData.id = Date.now().toString();
-      songs.push(songData);
+      const newId = Date.now().toString();
+      const newSong = { id: newId, ...songData };
+      songs.push(newSong);
+      if (db) {
+        try { await addDoc(collection(db, "songs"), songData); } catch(e){console.error(e);}
+      }
     }
 
     localStorage.setItem('spiewnik_songs', JSON.stringify(songs));
     renderAll();
-    
-    if (id && currentSongId === id) {
-      openSong(id);
-    } else {
-      showView('view-home');
-    }
-  };
-
-  window.processBulkImport = async function() {
-    const rawText = document.getElementById('form-bulk-text').value.trim();
-    if (!rawText) return alert("Wklej dane do importu!");
-
-    const cleanRawText = rawText.replace(/\r\n/g, '\n');
-    const blocks = cleanRawText.split(/(?=#\s+[^\n]+)/);
-    let addedCount = 0;
-
-    for (let block of blocks) {
-      block = block.trim();
-      if (!block) continue;
-
-      const lines = block.split('\n');
-      const headerLine = lines[0].trim();
-      
-      const match = headerLine.match(/^#\s*(.*?)(?:\s*\[(.*?)\])?$/);
-      if (!match) continue;
-
-      const title = match[1].trim();
-      const category = match[2] ? match[2].trim() : "Uwielbienie";
-
-      let lyrics = "";
-      let chords = "";
-
-      const bodyContent = lines.slice(1).join('\n');
-      const parts = bodyContent.split(/(?=#\s*(?:Tekst|Akordy))/i);
-
-      for (let part of parts) {
-        part = part.trim();
-        if (part.toLowerCase().startsWith("# tekst")) {
-          lyrics = part.replace(/^#\s*tekst/i, "").trim();
-        } else if (part.toLowerCase().startsWith("# akordy")) {
-          chords = part.replace(/^#\s*akordy/i, "").trim();
-        }
-      }
-
-      // Jeśli ktoś nie użył znaczników # Tekst / # Akordy, traktuj całość jako tekst
-      if (!lyrics && !chords) {
-        lyrics = bodyContent.trim();
-      }
-
-      if (title && lyrics) {
-        const songData = { title, category, audioUrl: "", lyrics, chords };
-        
-        if (db) {
-          try {
-            const docRef = await addDoc(collection(db, "songs"), songData);
-            songData.id = docRef.id;
-          } catch(e) {
-            songData.id = (Date.now() + Math.random()).toString();
-          }
-        } else {
-          songData.id = (Date.now() + Math.random()).toString();
-        }
-
-        songs.push(songData);
-        addedCount++;
-      }
-    }
-
-    if (addedCount > 0) {
-      localStorage.setItem('spiewnik_songs', JSON.stringify(songs));
-      renderAll();
-      alert(`Pomyślnie zaimportowano ${addedCount} utworów!`);
-      showView('view-home');
-    } else {
-      alert("Nie udało się sparsować żadnego utworu. Sprawdź, czy nagłówek zaczyna się od # Tytuł [Kategoria]");
-    }
+    showView('view-songs');
   };
 
   window.deleteCurrentSong = async function() {
+    if (!confirm("Na pewno usunąć ten utwór?")) return;
     const id = document.getElementById('form-id').value;
-    if (!id) return;
-
-    if (db) {
-      try { await deleteDoc(doc(db, "songs", id)); } catch(e){}
-    }
-
+    
     songs = songs.filter(s => s.id !== id);
     repertuarIds = repertuarIds.filter(i => i !== id);
+    
     localStorage.setItem('spiewnik_songs', JSON.stringify(songs));
     localStorage.setItem('spiewnik_repertuar', JSON.stringify(repertuarIds));
+
+    if (db && !id.startsWith("17")) {
+      try { await deleteDoc(doc(db, "songs", id)); } catch(e){console.error(e);}
+    }
+
     renderAll();
-    showView('view-home');
+    showView('view-songs');
   };
 
-  renderAll();
+  window.openBulkForm = function() {
+    if (!checkAdminAccess()) return;
+    document.getElementById('form-bulk-text').value = "";
+    showView('view-bulk');
+  };
+
+  window.processBulkImport = async function() {
+    if (!checkAdminAccess()) return;
+    const raw = document.getElementById('form-bulk-text').value;
+    if (!raw.trim()) return alert("Wklej dane do importu!");
+
+    // Dzielimy bloki po linijkach zaczynających się od cudzysłowu
+    const blocks = raw.split(/(?=^")/gm);
+    let count = 0;
+
+    for (let block of blocks) {
+      if (!block.trim()) continue;
+
+      const lines = block.trim().split('\n');
+      let firstLine = lines[0].trim();
+      
+      let title = "Bez tytułu";
+      let category = "Uwielbienie";
+      
+      // Sprawdzamy czy linia zaczyna się od cudzysłowu i wyciągamy tytuł oraz kategorię
+      const titleMatch = firstLine.match(/"([^"]+)"/);
+      if (titleMatch) {
+        title = titleMatch[1];
+        let remainder = firstLine.replace(titleMatch[0], '').trim();
+        const catMatch = remainder.match(/\[(.*?)\]|\((.*?)\)/);
+        if (catMatch) {
+          category = (catMatch[1] || catMatch[2]).trim();
+        }
+      } else {
+        title = firstLine; // fallback
+      }
+
+      let lyricsArr = [];
+      let chordsArr = [];
+      let audioUrl = "";
+      let currentMode = "lyrics";
+
+      for (let i = 1; i < lines.length; i++) {
+        let line = lines[i];
+        let lower = line.trim().toLowerCase();
+
+        if (lower.startsWith("# akordy")) {
+          currentMode = "chords";
+          continue;
+        } else if (lower.startsWith("# tekst")) {
+          currentMode = "lyrics";
+          continue;
+        } else if (lower.startsWith("# audio")) {
+          audioUrl = line.replace(/^# audio\s*/i, '').trim();
+          continue;
+        }
+
+        if (currentMode === "chords") {
+          chordsArr.push(line);
+        } else {
+          lyricsArr.push(line);
+        }
+      }
+
+      const newSongData = {
+        title: title,
+        category: category,
+        audioUrl: audioUrl,
+        lyrics: lyricsArr.join('\n').trim(),
+        chords: chordsArr.join('\n').trim()
+      };
+
+      if (db) {
+        try {
+          await addDoc(collection(db, "songs"), newSongData);
+        } catch (e) {
+          console.error("Błąd zapisu do Firebase:", e);
+        }
+      }
+
+      songs.push({ id: Date.now().toString() + Math.random(), ...newSongData });
+      count++;
+    }
+
+    localStorage.setItem('spiewnik_songs', JSON.stringify(songs));
+    alert(`Pomyślnie zaimportowano ${count} utworów!`);
+    document.getElementById('form-bulk-text').value = '';
+    renderAll();
+    showView('view-songs');
+  };
+
   fetchFromFirebase();
+  renderAll();
 </script>
 
 </body>
