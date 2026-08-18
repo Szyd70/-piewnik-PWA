@@ -84,7 +84,7 @@
       color: var(--text); border-radius: 8px; font-size: 1rem;
     }
     textarea.input-field { height: 120px; resize: vertical; }
-    textarea#form-bulk-text { height: 220px; font-family: monospace; font-size: 0.9rem; }
+    textarea#form-bulk-text { height: 260px; font-family: monospace; font-size: 0.9rem; }
 
     .nav-bar { display: flex; justify-content: space-between; margin-bottom: 15px; }
 
@@ -217,13 +217,15 @@
     </div>
 
     <p style="font-size: 0.85rem; color: var(--text-sub); margin-bottom: 10px;">
-      Nowy szablon (Tytuł i kategoria w nawiasie kwadratowym):<br>
+      Format z opcjonalnymi akordami:<br>
       <code style="color: var(--primary);"># Tytuł Pieśni [Kategoria]</code><br>
-      <code style="color: var(--primary);">Linijka tekstu pierwsza</code><br>
-      <code style="color: var(--primary);">Linijka tekstu druga...</code>
+      <code style="color: var(--primary);"># Tekst</code><br>
+      <code style="color: var(--primary);">Linijka tekstu...</code><br>
+      <code style="color: var(--primary);"># Akordy</code><br>
+      <code style="color: var(--primary);">G D e C</code>
     </p>
 
-    <textarea id="form-bulk-text" class="input-field" placeholder="# Tytuł 1 [Kategoria]&#10;Tekst pierwszej pieśni...&#10;&#10;# Tytuł 2 [Kategoria]&#10;Tekst drugiej pieśni..."></textarea>
+    <textarea id="form-bulk-text" class="input-field" placeholder="# Tytuł [Uwielbienie]&#10;# Tekst&#10;Tekst pieśni...&#10;&#10;# Akordy&#10;G D e C"></textarea>
 
     <button class="btn btn-filled" onclick="processBulkImport()">📥 Importuj wszystko</button>
   </div>
@@ -259,7 +261,6 @@
   const ADMIN_PIN = "1234";
   const chromaticScale = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
 
-  // Inicjalizacja motywu
   const savedTheme = localStorage.getItem('spiewnik_theme') || 'dark';
   if (savedTheme === 'light') {
     document.documentElement.setAttribute('data-theme', 'light');
@@ -298,7 +299,7 @@
         renderAll();
       }
     } catch (e) {
-      console.log("Błąd pobierania z Firebase (działam lokalnie):", e);
+      console.log("Błąd pobierania z Firebase:", e);
     }
   }
 
@@ -626,7 +627,7 @@
     if (!rawText) return alert("Wklej dane do importu!");
 
     const cleanRawText = rawText.replace(/\r\n/g, '\n');
-    const blocks = cleanRawText.split(/(?=#\s)/);
+    const blocks = cleanRawText.split(/(?=#\s+[^\n]+)/);
     let addedCount = 0;
 
     for (let block of blocks) {
@@ -642,10 +643,28 @@
       const title = match[1].trim();
       const category = match[2] ? match[2].trim() : "Uwielbienie";
 
-      const lyrics = lines.slice(1).join('\n').trim();
+      let lyrics = "";
+      let chords = "";
+
+      const bodyContent = lines.slice(1).join('\n');
+      const parts = bodyContent.split(/(?=#\s*(?:Tekst|Akordy))/i);
+
+      for (let part of parts) {
+        part = part.trim();
+        if (part.toLowerCase().startsWith("# tekst")) {
+          lyrics = part.replace(/^#\s*tekst/i, "").trim();
+        } else if (part.toLowerCase().startsWith("# akordy")) {
+          chords = part.replace(/^#\s*akordy/i, "").trim();
+        }
+      }
+
+      // Jeśli ktoś nie użył znaczników # Tekst / # Akordy, traktuj całość jako tekst
+      if (!lyrics && !chords) {
+        lyrics = bodyContent.trim();
+      }
 
       if (title && lyrics) {
-        const songData = { title, category, audioUrl: "", lyrics, chords: "" };
+        const songData = { title, category, audioUrl: "", lyrics, chords };
         
         if (db) {
           try {
