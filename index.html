@@ -217,13 +217,13 @@
     </div>
 
     <p style="font-size: 0.85rem; color: var(--text-sub); margin-bottom: 10px;">
-      Szablon (Tytuł i czysty tekst):<br>
-      <code style="color: var(--primary);">=== Tytuł Pieśni (Kategoria) ===</code><br>
+      Nowy szablon (Tytuł i kategoria w nawiasie kwadratowym):<br>
+      <code style="color: var(--primary);"># Tytuł Pieśni [Kategoria]</code><br>
       <code style="color: var(--primary);">Linijka tekstu pierwsza</code><br>
       <code style="color: var(--primary);">Linijka tekstu druga...</code>
     </p>
 
-    <textarea id="form-bulk-text" class="input-field" placeholder="=== Tytuł 1 (Kategoria) ===&#10;Tekst pierwszej pieśni...&#10;&#10;=== Tytuł 2 ===&#10;Tekst drugiej pieśni..."></textarea>
+    <textarea id="form-bulk-text" class="input-field" placeholder="# Tytuł 1 [Kategoria]&#10;Tekst pierwszej pieśni...&#10;&#10;# Tytuł 2 [Kategoria]&#10;Tekst drugiej pieśni..."></textarea>
 
     <button class="btn btn-filled" onclick="processBulkImport()">📥 Importuj wszystko</button>
   </div>
@@ -625,9 +625,8 @@
     const rawText = document.getElementById('form-bulk-text').value.trim();
     if (!rawText) return alert("Wklej dane do importu!");
 
-    // Ujednolicenie znaków nowych linii i podzielenie po nagłówkach ===
     const cleanRawText = rawText.replace(/\r\n/g, '\n');
-    const blocks = cleanRawText.split(/(?====)/);
+    const blocks = cleanRawText.split(/(?=#\s)/);
     let addedCount = 0;
 
     for (let block of blocks) {
@@ -637,14 +636,12 @@
       const lines = block.split('\n');
       const headerLine = lines[0].trim();
       
-      // Elastyczny regex ignorujący spacje na końcu linii
-      const match = headerLine.match(/^===\s*(.*?)(?:\s*\((.*?)\))?\s*===/);
+      const match = headerLine.match(/^#\s*(.*?)(?:\s*\[(.*?)\])?$/);
       if (!match) continue;
 
       const title = match[1].trim();
       const category = match[2] ? match[2].trim() : "Uwielbienie";
 
-      // Wszystko po nagłówku to czysty tekst pieśni
       const lyrics = lines.slice(1).join('\n').trim();
 
       if (title && lyrics) {
@@ -672,7 +669,7 @@
       alert(`Pomyślnie zaimportowano ${addedCount} utworów!`);
       showView('view-home');
     } else {
-      alert("Nie udało się sparsować żadnego utworu. Sprawdź, czy nagłówki zaczynają się od === Tytuł ===");
+      alert("Nie udało się sparsować żadnego utworu. Sprawdź, czy nagłówek zaczyna się od # Tytuł [Kategoria]");
     }
   };
 
