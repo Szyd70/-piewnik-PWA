@@ -374,6 +374,21 @@
     <div id="archive-list"></div>
   </div>
 
+  <!-- WIDOK: PODGLĄD ARCHIWUM -->
+  <div id="view-archive-detail" class="hidden">
+    <div class="nav-bar">
+      <button class="btn btn-secondary btn-small" onclick="showView('view-archive')">⬅️ Powrót</button>
+      <h2 id="archive-detail-title">Podgląd Archiwum</h2>
+      <div></div>
+    </div>
+
+    <div class="admin-only hidden" style="margin-bottom: 16px;">
+      <button class="btn btn-filled" onclick="applyArchiveAsCurrent()">📌 Ustaw ten zestaw jako Bieżący Repertuar</button>
+    </div>
+
+    <div id="archive-detail-list"></div>
+  </div>
+
   <!-- WIDOK: POJEDYNCZA PIEŚŃ -->
   <div id="view-single" class="hidden">
     <div class="nav-bar">
@@ -476,6 +491,7 @@
   let repertuarIds = [];
   let repertuarRoles = {}; 
   let currentAnnouncement = "Brak aktualnych ogłoszeń.";
+  let selectedArchive = null;
 
   let isAdmin = false;
   let activeCategory = 'Wszystkie';
@@ -756,7 +772,7 @@
           <div style="font-size:0.78rem; color:var(--text-sub); margin-top:2px;">Pieśni: ${(arch.songIds || []).length}</div>
         </div>
         <div style="display:flex; gap:6px;">
-          <button class="btn btn-secondary btn-small" onclick="loadArchive('${arch.id}')">📂 Otwórz</button>
+          <button class="btn btn-secondary btn-small" onclick="viewArchiveDetail('${arch.id}')">📂 Otwórz</button>
           ${deleteBtn}
         </div>
       `;
@@ -764,18 +780,19 @@
     });
   }
 
-  function createSongRow(song, isRepertuarView = false) {
+  function createSongRow(song, isRepertuarView = false, customRoles = null) {
     const div = document.createElement('div');
     div.className = 'song-item';
     const inRep = repertuarIds.includes(song.id);
     const audioIcon = (song.audioUrl && song.audioUrl.trim() !== '') ? ' 🎵' : '';
     const actionsIcon = song.hasActions ? ' 🙌' : '';
     
-    const role = repertuarRoles[song.id] || '';
+    const rolesSource = customRoles || repertuarRoles;
+    const role = rolesSource[song.id] || '';
     const roleBadge = (isRepertuarView && role) ? `<span class="role-badge">${role}</span>` : '';
 
     let adminControls = '';
-    if (isAdmin && isRepertuarView) {
+    if (isAdmin && isRepertuarView && !customRoles) {
       const optionsHTML = ['<option value="">-- Rola --</option>', ...LITURGICAL_ROLES.map(r => 
         `<option value="${r}" ${role === r ? 'selected' : ''}>${r}</option>`
       )].join('');
@@ -788,7 +805,7 @@
           <button class="btn btn-secondary btn-small" onclick="toggleRepertuar('${song.id}')">➖ Usunąć</button>
         </div>
       `;
-    } else if (isAdmin && !isRepertuarView) {
+    } else if (isAdmin && !isRepertuarView && !customRoles) {
       adminControls = `
         <button class="btn btn-secondary btn-small" onclick="toggleRepertuar('${song.id}')">
           ${inRep ? '➖' : '➕'}
@@ -836,6 +853,7 @@
 
     if (!document.getElementById('view-songs').classList.contains('hidden')) previousView = 'view-songs';
     else if (!document.getElementById('view-repertuar').classList.contains('hidden')) previousView = 'view-repertuar';
+    else if (!document.getElementById('view-archive-detail').classList.contains('hidden')) previousView = 'view-archive-detail';
     else previousView = 'view-home';
 
     const titleWithActions = song.title + (song.hasActions ? ' 🙌' : '');
@@ -991,19 +1009,60 @@
     }
   };
 
-  window.loadArchive = async function(id) {
+  window.viewArchiveDetail = function(id) {
     const arch = archives.find(a => a.id === id);
     if (!arch) return;
-    
-    repertuarIds = Array.isArray(arch.songIds) ? [...arch.songIds] : [];
-    repertuarRoles = arch.roles ? { ...arch.roles } : {};
 
-    if (db && isAdmin) {
+    selectedArchive = arch;
+    document.getElementById('archive-detail-title').innerText = arch.name;
+
+    const container = document.getElementById('archive-detail-list');
+    container.innerHTML = '';
+
+    const archIds = Array.isArray(arch.songIds) ? arch.songIds : [];
+    const archRoles = arch.roles || {};
+
+    let list = songs.filter(s => archIds.includes(s.id));
+
+    if (list.length === 0) {
+      container.innerHTML = '<p style="color: var(--text-sub); font-size: 0.9rem;">To archiwum jest puste lub pieśni zostały usunięte.</p>';
+    } else {
+      list.sort((a, b) => {
+        const roleA = archRoles[a.id] || '';
+        const roleB = archRoles[b.id] || '';
+
+        const indexA = LITURGICAL_ROLES.indexOf(roleA);
+        const indexB = LITURGICAL_ROLES.indexOf(roleB);
+
+        const orderA = indexA !== -1 ? indexA : 99;
+        const orderB = indexB !== -1 ? indexB : 99;
+
+        if (orderA !== orderB) return orderA - orderB;
+        return (a.title || '').localeCompare(b.title || '', 'pl');
+      });
+
+      list.forEach(song => {
+        container.appendChild(createSongRow(song, true, archRoles));
+      });
+    }
+
+    showView('view-archive-detail');
+  };
+
+  window.applyArchiveAsCurrent = async function() {
+    if (!isAdmin || !selectedArchive) return;
+    if (!confirm(`Czy na pewno chcesz ustawić "${selectedArchive.name}" jako bieżący repertuar?`)) return;
+
+    repertuarIds = Array.isArray(selectedArchive.songIds) ? [...selectedArchive.songIds] : [];
+    repertuarRoles = selectedArchive.roles ? { ...selectedArchive.roles } : {};
+
+    if (db) {
       try {
         await setDoc(doc(db, "repertuar", "current"), { 
           songIds: repertuarIds,
           roles: repertuarRoles
         });
+        alert("Pomyślnie zmieniono bieżący repertuar!");
       } catch (e) {
         console.error("Błąd ładowania archiwum do chmury:", e);
       }
