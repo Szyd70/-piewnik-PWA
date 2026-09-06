@@ -76,7 +76,7 @@
       letter-spacing: -0.2px; 
     }
 
-    /* ZWIĘKSZONY KONTENER BANERU */
+    /* BANER */
     .banner-container {
       width: 100%;
       height: 220px;
@@ -260,7 +260,19 @@
       margin-bottom: 8px;
       text-transform: uppercase;
     }
-    .controls-panel { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--border); }
+    .controls-panel { 
+      display: flex; 
+      flex-wrap: wrap; 
+      gap: 6px; 
+      margin-top: 16px; 
+      padding-top: 12px; 
+      border-top: 1px solid var(--border); 
+      position: sticky;
+      top: 10px;
+      background: var(--bg);
+      z-index: 10;
+      padding-bottom: 8px;
+    }
   </style>
 </head>
 <body>
@@ -369,6 +381,7 @@
       <button class="btn btn-secondary btn-small" onclick="toggleChords()">🎸 Akordy</button>
       <button class="btn btn-secondary btn-small" onclick="transpose(1)">Ton +1</button>
       <button class="btn btn-secondary btn-small" onclick="transpose(-1)">Ton -1</button>
+      <button class="btn btn-secondary btn-small" id="btn-reset-trans" onclick="resetTranspose()">🔄 Orig</button>
       <button class="btn btn-secondary btn-small" onclick="changeFontSize(2)">A+</button>
       <button class="btn btn-secondary btn-small" onclick="changeFontSize(-2)">A-</button>
       <button class="btn btn-secondary btn-small" id="btn-scroll" onclick="toggleAutoScroll()">📜 Scroll</button>
@@ -428,6 +441,13 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { getFirestore, collection, addDoc, doc, setDoc, updateDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+  // Rejestracja Service Workera dla pełnego wsparcia offline PWA
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW registration failed:', err));
+    });
+  }
 
   const firebaseConfig = {
     projectId: "spiewnik-psie-pole"
@@ -887,6 +907,11 @@
     if (!originalChords) return;
     currentTransposeSteps = (currentTransposeSteps + steps) % 12;
     if (currentTransposeSteps < 0) currentTransposeSteps += 12;
+    renderChordsView();
+  };
+
+  window.resetTranspose = function() {
+    currentTransposeSteps = 0;
     renderChordsView();
   };
 
