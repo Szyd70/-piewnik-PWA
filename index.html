@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Śpiewnik Psie Pole</title>
   
-  <link rel="icon" type="image/jpeg" href="IMG_20260817_103611.jpg">
-  <link rel="apple-touch-icon" href="IMG_20260817_103611.jpg">
+  <link rel="icon" type="image/png" href="1788684520282.png">
+  <link rel="apple-touch-icon" href="1788684520282.png">
   <link rel="manifest" href="manifest.json">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -291,7 +291,7 @@
   <!-- EKRAN GŁÓWNY -->
   <div id="view-home">
     <div class="banner-container">
-      <img src="IMG_20260817_103611.jpg" alt="Baner Śpiewnik" style="width: 100%; height: 100%; object-fit: cover; object-position: top center; display: block;">
+      <img src="1788684520282.png" alt="Baner Śpiewnik" style="width: 100%; height: 100%; object-fit: cover; object-position: top center; display: block;">
     </div>
 
     <!-- SEKCJA BIEŻĄCYCH OGŁOSZEŃ -->
@@ -1064,7 +1064,7 @@
 
     try {
       if (id) {
-        if (db) await updateDoc(doc(db, "songs", id), songData);
+        if (db) await updateDoc(doc(doc(db, "songs", id)), songData);
       } else {
         if (db) await addDoc(collection(db, "songs"), songData);
       }
