@@ -994,9 +994,12 @@
   window.loadArchive = async function(id) {
     const arch = archives.find(a => a.id === id);
     if (!arch) return;
+    
+    // 1. Przypisujemy dane lokalnie
     repertuarIds = [...(arch.songIds || [])];
     repertuarRoles = { ...(arch.roles || {}) };
 
+    // 2. Jeśli jestesmy adminem, aktualizujemy chmurę dla wszystkich
     if (db && isAdmin) {
       try {
         await setDoc(doc(db, "repertuar", "current"), { 
@@ -1004,9 +1007,12 @@
           roles: repertuarRoles
         });
       } catch (e) {
-        console.error("Błąd ładowania archiwum:", e);
+        console.error("Błąd ładowania archiwum do chmury:", e);
       }
     }
+
+    // 3. Wymuszamy natychmiastowe renderowanie listy na ekranie
+    renderRepertuar();
     showView('view-repertuar');
   };
 
@@ -1076,7 +1082,6 @@
 
     try {
       if (id) {
-        // Poprawione pojedyncze wywołanie doc(...)
         if (db) await updateDoc(doc(db, "songs", id), songData);
       } else {
         if (db) await addDoc(collection(db, "songs"), songData);
