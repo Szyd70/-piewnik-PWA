@@ -11,69 +11,90 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="theme-color" content="#118ab2">
+  <meta name="theme-color" content="#1a2530">
+
+  <!-- Szlachetne kroje pism -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
 
   <style>
     :root {
-      --bg: #fffdf9;
+      --bg: #f8f9fa;
       --card-bg: #ffffff;
-      --primary: #118ab2;
-      --primary-hover: #0ed0d0;
-      --accent: #ff477e;
-      --accent-yellow: #ffd166;
-      --text: #2b2d42;
-      --text-sub: #6c757d;
-      --border: #e9ecef;
-      --chords-bg: #f1f9ff;
-      --shadow: 0 8px 20px rgba(17, 138, 178, 0.08);
-      --announcement-bg: #fff8e7;
-      --announcement-border: #ffd166;
+      --primary: #1a2530;
+      --primary-hover: #2c3e50;
+      --accent-gold: #c5a059;
+      --accent-gold-light: #fdfbf7;
+      --accent-red: #a84242;
+      --text: #1f2937;
+      --text-sub: #6b7280;
+      --border: #e5e7eb;
+      --chords-bg: #f0f4f8;
+      --chords-text: #0f4c81;
+      --shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+      --announcement-bg: #fdfbf7;
+      --announcement-border: #e2d1b0;
     }
 
     [data-theme="dark"] {
-      --bg: #1a1e29;
-      --card-bg: #252b3b;
-      --primary: #4cc9f0;
-      --primary-hover: #4895ef;
-      --accent: #ff477e;
-      --accent-yellow: #ffd166;
-      --text: #f8f9fa;
-      --text-sub: #a0aec0;
-      --border: #343d52;
-      --chords-bg: #1c2333;
-      --shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-      --announcement-bg: #2b2a1f;
-      --announcement-border: #d4a373;
+      --bg: #111827;
+      --card-bg: #1f2937;
+      --primary: #93c5fd;
+      --primary-hover: #bfdbfe;
+      --accent-gold: #d4af37;
+      --accent-gold-light: #1e2530;
+      --accent-red: #f87171;
+      --text: #f3f4f6;
+      --text-sub: #9ca3af;
+      --border: #374151;
+      --chords-bg: #111827;
+      --chords-text: #60a5fa;
+      --shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      --announcement-bg: #1c222d;
+      --announcement-border: #4a3e28;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Nunito', system-ui, -apple-system, sans-serif; }
-    body { background-color: var(--bg); color: var(--text); padding: 16px; display: flex; justify-content: center; transition: background 0.3s, color 0.3s; }
-    .container { width: 100%; max-width: 500px; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); padding: 20px 16px; display: flex; justify-content: center; transition: background 0.3s, color 0.3s; }
+    .container { width: 100%; max-width: 540px; }
 
-    .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-    .header-controls { display: flex; gap: 6px; }
-    h1 { color: var(--primary); font-size: 1.4rem; font-weight: 800; letter-spacing: -0.5px; }
+    .header-top { 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      margin-bottom: 20px; 
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .header-controls { display: flex; gap: 8px; }
+    h1 { 
+      font-family: 'Playfair Display', Georgia, serif; 
+      color: var(--primary); 
+      font-size: 1.5rem; 
+      font-weight: 700; 
+      letter-spacing: -0.2px; 
+    }
 
     .banner-container {
       width: 100%;
-      height: 200px;
-      border-radius: 20px;
+      height: 180px;
+      border-radius: 12px;
       overflow: hidden;
-      margin-bottom: 16px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
     }
 
     /* SEKCJA OGŁOSZEŃ */
     .announcement-box {
       background-color: var(--announcement-bg);
-      border: 2px solid var(--announcement-border);
-      border-radius: 16px;
+      border: 1px solid var(--announcement-border);
+      border-left: 4px solid var(--accent-gold);
+      border-radius: 8px;
       padding: 16px;
-      margin-bottom: 20px;
+      margin-bottom: 24px;
       box-shadow: var(--shadow);
-      position: relative;
     }
     .announcement-header {
       display: flex;
@@ -82,53 +103,57 @@
       margin-bottom: 8px;
     }
     .announcement-title {
-      font-size: 1.05rem;
-      font-weight: 800;
-      color: var(--text);
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--accent-gold);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
       display: flex;
       align-items: center;
       gap: 6px;
     }
     .announcement-text {
       font-size: 0.95rem;
-      line-height: 1.5;
+      line-height: 1.6;
       white-space: pre-wrap;
       color: var(--text);
     }
 
     .btn {
       width: 100%;
-      padding: 16px;
+      padding: 14px 20px;
       margin-bottom: 12px;
-      border: 2px solid var(--border);
+      border: 1px solid var(--border);
       background-color: var(--card-bg);
       color: var(--text);
-      border-radius: 166px;
-      font-size: 1.05rem;
-      font-weight: 700;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 600;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 10px;
+      gap: 8px;
       text-decoration: none;
       box-shadow: var(--shadow);
       transition: all 0.2s ease;
     }
-    .btn:active { transform: scale(0.98); }
+    .btn:hover { border-color: var(--accent-gold); }
+    .btn:active { transform: scale(0.99); }
     
     .btn-filled { background-color: var(--primary); color: #ffffff; border-color: var(--primary); }
+    [data-theme="dark"] .btn-filled { color: #111827; }
     .btn-secondary { background-color: var(--card-bg); border-color: var(--border); color: var(--text); }
-    .btn-danger { border-color: var(--accent); color: var(--accent); }
-    .btn-small { width: auto; padding: 6px 12px; font-size: 0.8rem; margin-bottom: 0; border-radius: 12px; }
+    .btn-danger { border-color: var(--accent-red); color: var(--accent-red); }
+    .btn-small { width: auto; padding: 6px 12px; font-size: 0.8rem; margin-bottom: 0; border-radius: 6px; font-weight: 500; }
 
     .hidden { display: none !important; }
 
     .song-item, .archive-item {
       background-color: var(--card-bg);
       border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 14px;
+      border-radius: 8px;
+      padding: 12px 16px;
       margin-bottom: 10px;
       display: flex;
       justify-content: space-between;
@@ -136,93 +161,105 @@
       box-shadow: var(--shadow);
       flex-wrap: wrap;
       gap: 8px;
+      transition: border-color 0.2s ease;
     }
+    .song-item:hover { border-color: var(--accent-gold); }
     .song-title-btn {
       background: none; border: none; color: var(--text);
-      font-size: 1.05rem; font-weight: 700; text-align: left;
+      font-size: 1rem; font-weight: 600; text-align: left;
       flex-grow: 1; cursor: pointer;
     }
     .song-category { 
-      font-size: 0.75rem; 
-      color: var(--primary); 
+      font-size: 0.72rem; 
+      color: var(--accent-gold); 
       display: inline-block; 
       margin-top: 4px;
-      background: rgba(17, 138, 178, 0.1);
+      background: var(--accent-gold-light);
+      border: 1px solid var(--announcement-border);
       padding: 2px 8px;
-      border-radius: 8px;
+      border-radius: 4px;
       font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
     }
     .role-badge {
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       color: #ffffff;
-      background-color: var(--accent);
+      background-color: var(--accent-gold);
       padding: 2px 8px;
-      border-radius: 8px;
-      font-weight: 700;
+      border-radius: 4px;
+      font-weight: 600;
       margin-left: 6px;
+      text-transform: uppercase;
     }
 
     .input-field, .select-field {
-      width: 100%; padding: 14px; margin-bottom: 12px;
-      background-color: var(--card-bg); border: 2px solid var(--border);
-      color: var(--text); border-radius: 14px; font-size: 1rem;
-      outline: none;
+      width: 100%; padding: 12px 14px; margin-bottom: 12px;
+      background-color: var(--card-bg); border: 1px solid var(--border);
+      color: var(--text); border-radius: 8px; font-size: 0.95rem;
+      outline: none; transition: border-color 0.2s ease;
     }
     .select-field {
       padding: 6px 10px;
-      font-size: 0.85rem;
-      border-radius: 10px;
+      font-size: 0.82rem;
+      border-radius: 6px;
       width: auto;
       margin-bottom: 0;
-      font-weight: 600;
+      font-weight: 500;
     }
-    .input-field:focus, .select-field:focus { border-color: var(--primary); }
+    .input-field:focus, .select-field:focus { border-color: var(--accent-gold); }
     textarea.input-field { height: 120px; resize: vertical; }
-    textarea#form-bulk-text { height: 260px; font-family: monospace; font-size: 0.9rem; }
+    textarea#form-bulk-text { height: 260px; font-family: monospace; font-size: 0.85rem; }
 
     .checkbox-container {
       display: flex;
       align-items: center;
       gap: 10px;
       margin-bottom: 14px;
-      font-weight: 700;
+      font-size: 0.9rem;
+      font-weight: 500;
       cursor: pointer;
       user-select: none;
     }
     .checkbox-container input {
-      width: 20px;
-      height: 20px;
-      accent-color: var(--primary);
+      width: 18px;
+      height: 18px;
+      accent-color: var(--accent-gold);
       cursor: pointer;
     }
 
-    .nav-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+    .nav-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .nav-bar h2 { font-family: 'Playfair Display', Georgia, serif; font-size: 1.25rem; font-weight: 700; color: var(--primary); }
 
-    .cat-bar { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 15px; }
+    .cat-bar { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 16px; }
     .cat-chip {
       background: var(--card-bg); border: 1px solid var(--border); color: var(--text-sub);
-      padding: 8px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 700; white-space: nowrap; cursor: pointer;
-      box-shadow: var(--shadow);
+      padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 500; white-space: nowrap; cursor: pointer;
+      transition: all 0.2s ease;
     }
-    .cat-chip.active { background: var(--primary); color: #ffffff; border-color: var(--primary); }
+    .cat-chip.active { background: var(--primary); color: #ffffff; border-color: var(--primary); font-weight: 600; }
+    [data-theme="dark"] .cat-chip.active { color: #111827; }
 
-    .song-lyrics { white-space: pre-wrap; font-size: 1.15rem; line-height: 1.6; margin-top: 15px; }
+    .song-lyrics { white-space: pre-wrap; font-size: 1.1rem; line-height: 1.7; margin-top: 16px; font-family: 'Inter', sans-serif; }
     .song-chords {
-      white-space: pre-wrap; font-family: monospace; font-size: 1.1rem;
-      color: var(--primary); background: var(--chords-bg); padding: 12px;
-      border-radius: 12px; margin-top: 10px; display: none; font-weight: bold;
+      white-space: pre-wrap; font-family: monospace; font-size: 1.05rem;
+      color: var(--chords-text); background: var(--chords-bg); padding: 14px;
+      border-radius: 8px; margin-top: 12px; display: none; font-weight: 600;
+      border: 1px solid var(--border);
     }
     .capo-badge {
       display: inline-block;
-      background: var(--accent-yellow);
-      color: #000;
-      font-weight: bold;
-      font-size: 0.85rem;
+      background: var(--accent-gold-light);
+      border: 1px solid var(--announcement-border);
+      color: var(--accent-gold);
+      font-weight: 700;
+      font-size: 0.8rem;
       padding: 4px 10px;
-      border-radius: 12px;
+      border-radius: 4px;
       margin-bottom: 8px;
+      text-transform: uppercase;
     }
-    .controls-panel { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 15px; }
+    .controls-panel { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--border); }
   </style>
 </head>
 <body>
@@ -231,7 +268,7 @@
 
   <!-- NAGŁÓWEK -->
   <div class="header-top">
-    <h1>ŚPIEWNIK PSIE POLE</h1>
+    <h1>Śpiewnik Psie Pole</h1>
     <div class="header-controls">
       <button class="btn btn-secondary btn-small" onclick="toggleAdminMode()" id="role-btn">🔑 Zaloguj</button>
       <button class="btn btn-secondary btn-small" onclick="toggleTheme()" id="theme-btn">🌙</button>
@@ -247,7 +284,7 @@
     <!-- SEKCJA BIEŻĄCYCH OGŁOSZEŃ -->
     <div class="announcement-box" id="announcement-card">
       <div class="announcement-header">
-        <span class="announcement-title">📢 Bieżące Ogłoszenia</span>
+        <span class="announcement-title">📢 Ogłoszenia</span>
         <button class="btn btn-secondary btn-small admin-only hidden" onclick="openAnnouncementForm()">✏️ Edytuj</button>
       </div>
       <div class="announcement-text" id="announcement-display-text">Brak aktualnych ogłoszeń.</div>
@@ -258,9 +295,9 @@
     <button class="btn btn-filled" onclick="showView('view-archive')">📁 Archiwum Repertuarów</button>
     
     <div class="admin-only hidden">
-      <div style="margin: 20px 0 10px 0; border-top: 1px dashed var(--border);"></div>
+      <div style="margin: 20px 0 12px 0; border-top: 1px dashed var(--border);"></div>
       <button class="btn btn-secondary" onclick="openAddForm()">➕ Dodaj Utwór</button>
-      <button class="btn btn-secondary" onclick="openBulkForm()">📥 Dodaj masowo utwory</button>
+      <button class="btn btn-secondary" onclick="openBulkForm()">📥 Import Masowy</button>
     </div>
   </div>
 
@@ -268,7 +305,7 @@
   <div id="view-announcement-form" class="hidden">
     <div class="nav-bar">
       <button class="btn btn-secondary btn-small" onclick="showView('view-home')">Anuluj</button>
-      <h2>Edytuj Ogłoszenia</h2>
+      <h2>Edycja Ogłoszeń</h2>
       <div></div>
     </div>
     <textarea id="announcement-input" class="input-field" style="height: 200px;" placeholder="Wpisz treść ogłoszeń..."></textarea>
@@ -278,7 +315,7 @@
   <!-- WIDOK: ŚPIEWNIK -->
   <div id="view-songs" class="hidden">
     <div class="nav-bar">
-      <button class="btn btn-secondary btn-small" onclick="showView('view-home')">⬅️ Wróć</button>
+      <button class="btn btn-secondary btn-small" onclick="showView('view-home')">⬅️ Powrót</button>
       <h2>Śpiewnik</h2>
       <div></div>
     </div>
@@ -290,7 +327,7 @@
   <!-- WIDOK: REPERTUAR -->
   <div id="view-repertuar" class="hidden">
     <div class="nav-bar">
-      <button class="btn btn-secondary btn-small" onclick="showView('view-home')">⬅️ Wróć</button>
+      <button class="btn btn-secondary btn-small" onclick="showView('view-home')">⬅️ Powrót</button>
       <h2>Bieżący Repertuar</h2>
       <div></div>
     </div>
@@ -306,7 +343,7 @@
   <!-- WIDOK: ARCHIWUM -->
   <div id="view-archive" class="hidden">
     <div class="nav-bar">
-      <button class="btn btn-secondary btn-small" onclick="showView('view-home')">⬅️ Wróć</button>
+      <button class="btn btn-secondary btn-small" onclick="showView('view-home')">⬅️ Powrót</button>
       <h2>Archiwum</h2>
       <div></div>
     </div>
@@ -316,12 +353,12 @@
   <!-- WIDOK: POJEDYNCZA PIEŚŃ -->
   <div id="view-single" class="hidden">
     <div class="nav-bar">
-      <button class="btn btn-secondary btn-small" onclick="goBackFromSong()">⬅️ Wróć</button>
+      <button class="btn btn-secondary btn-small" onclick="goBackFromSong()">⬅️ Powrót</button>
       <span id="view-category" class="song-category"></span>
       <button class="btn btn-secondary btn-small admin-only hidden" onclick="editCurrentSong()">✏️ Edytuj</button>
     </div>
 
-    <h2 id="view-title" style="margin-top: 10px; color: var(--primary);"></h2>
+    <h2 id="view-title" style="margin-top: 10px; font-family: 'Playfair Display', Georgia, serif; color: var(--primary);"></h2>
     
     <div id="view-audio-container" class="hidden" style="margin-top: 10px;">
       <a id="view-audio-btn" href="#" target="_blank" class="btn btn-secondary btn-small" style="display: inline-flex; width: auto;">🎧 Posłuchaj nagrania</a>
@@ -329,11 +366,11 @@
 
     <div class="controls-panel">
       <button class="btn btn-secondary btn-small" onclick="toggleChords()">🎸 Akordy</button>
-      <button class="btn btn-secondary btn-small" onclick="transpose(1)">🎸 Ton +1</button>
-      <button class="btn btn-secondary btn-small" onclick="transpose(-1)">🎸 Ton -1</button>
-      <button class="btn btn-secondary btn-small" onclick="changeFontSize(2)">🔍 A+</button>
-      <button class="btn btn-secondary btn-small" onclick="changeFontSize(-2)">🔍 A-</button>
-      <button class="btn btn-secondary btn-small" id="btn-scroll" onclick="toggleAutoScroll()">📜 Auto Scroll</button>
+      <button class="btn btn-secondary btn-small" onclick="transpose(1)">Ton +1</button>
+      <button class="btn btn-secondary btn-small" onclick="transpose(-1)">Ton -1</button>
+      <button class="btn btn-secondary btn-small" onclick="changeFontSize(2)">A+</button>
+      <button class="btn btn-secondary btn-small" onclick="changeFontSize(-2)">A-</button>
+      <button class="btn btn-secondary btn-small" id="btn-scroll" onclick="toggleAutoScroll()">📜 Scroll</button>
     </div>
 
     <div id="view-chords" class="song-chords"></div>
@@ -372,7 +409,7 @@
       <h2>Import Masowy</h2>
       <div></div>
     </div>
-    <p style="font-size: 0.85rem; color: var(--text-sub); margin-bottom: 10px;">
+    <p style="font-size: 0.85rem; color: var(--text-sub); margin-bottom: 12px; line-height: 1.5;">
       Format:<br>
       "Tytuł Pieśni" [Kategoria]<br>
       # Pokazywanie: tak<br>
@@ -391,7 +428,6 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { getFirestore, collection, addDoc, doc, setDoc, updateDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-  // Zachowana konfigujacja poprzedniej bazy danych Firestore
   const firebaseConfig = {
     projectId: "spiewnik-psie-pole"
   };
@@ -425,7 +461,6 @@
   const scaleMajor = ["C", "Cis", "D", "Dis", "E", "F", "Fis", "G", "Gis", "A", "B", "H"];
   const scaleMinor = ["c", "cis", "d", "dis", "e", "f", "fis", "g", "gis", "a", "b", "h"];
 
-  // Rejestracja PWA
   let deferredPrompt;
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
@@ -440,9 +475,9 @@
     const banner = document.createElement('div');
     banner.id = 'pwa-install-banner';
     banner.innerHTML = `
-      <div style="position: fixed; bottom: 0; left: 0; right: 0; background: var(--card-bg); border-top: 2px solid var(--primary); padding: 20px; box-shadow: 0 -5px 25px rgba(0,0,0,0.2); text-align: center; z-index: 9999;">
-        <h3 style="color: var(--primary); margin-bottom: 8px;">Zainstaluj aplikację Śpiewnika</h3>
-        <p style="font-size: 0.9rem; color: var(--text-sub); margin-bottom: 15px;">Zainstaluj aplikację na telefonie, aby mieć do niej szybki dostęp bez przeglądarki.</p>
+      <div style="position: fixed; bottom: 0; left: 0; right: 0; background: var(--card-bg); border-top: 2px solid var(--accent-gold); padding: 20px; box-shadow: 0 -5px 25px rgba(0,0,0,0.15); text-align: center; z-index: 9999;">
+        <h3 style="font-family: 'Playfair Display', serif; color: var(--primary); margin-bottom: 8px;">Zainstaluj aplikację Śpiewnika</h3>
+        <p style="font-size: 0.85rem; color: var(--text-sub); margin-bottom: 15px;">Miej śpiewnik zawsze pod ręką, także offline.</p>
         <div style="display: flex; gap: 10px; justify-content: center;">
           <button id="pwa-install-btn" class="btn btn-filled" style="width: auto; padding: 10px 20px;">📲 Zainstaluj teraz</button>
           <button onclick="document.getElementById('pwa-install-banner').remove()" class="btn btn-secondary" style="width: auto; padding: 10px 15px;">Później</button>
@@ -463,7 +498,6 @@
     });
   }
 
-  // Motyw
   const savedTheme = localStorage.getItem('spiewnik_theme') || 'light';
   if (savedTheme === 'dark') {
     document.documentElement.setAttribute('data-theme', 'dark');
@@ -505,7 +539,7 @@
 
     if (isAdmin) {
       roleBtn.innerText = "🔒 Wyjdź";
-      roleBtn.style.borderColor = "var(--accent)";
+      roleBtn.style.borderColor = "var(--accent-red)";
       adminElements.forEach(el => el.classList.remove('hidden'));
     } else {
       roleBtn.innerText = "🔑 Zaloguj";
@@ -515,7 +549,6 @@
     renderAll();
   }
 
-  // Synch z Firebase
   function initFirebaseSync() {
     if (!db) return;
 
@@ -550,7 +583,6 @@
       renderArchives();
     });
 
-    // Synchronizacja ogłoszeń z Firebase
     onSnapshot(doc(db, "announcements", "main"), (docSnap) => {
       if (docSnap.exists() && docSnap.data().text) {
         currentAnnouncement = docSnap.data().text;
@@ -634,7 +666,7 @@
     }
 
     if (sortedSongs.length === 0) {
-      container.innerHTML = '<p style="color: var(--text-sub);">Brak utworów w tej kategorii.</p>';
+      container.innerHTML = '<p style="color: var(--text-sub); font-size: 0.9rem;">Brak utworów w tej kategorii.</p>';
       return;
     }
 
@@ -648,7 +680,7 @@
     let list = songs.filter(s => repertuarIds.includes(s.id));
 
     if (list.length === 0) {
-      container.innerHTML = '<p style="color: var(--text-sub);">Repertuar jest obecnie pusty.</p>';
+      container.innerHTML = '<p style="color: var(--text-sub); font-size: 0.9rem;">Repertuar jest obecnie pusty.</p>';
       return;
     }
 
@@ -678,7 +710,7 @@
     container.innerHTML = '';
 
     if (archives.length === 0) {
-      container.innerHTML = '<p style="color: var(--text-sub);">Brak zapisanych archiwów.</p>';
+      container.innerHTML = '<p style="color: var(--text-sub); font-size: 0.9rem;">Brak zapisanych archiwów.</p>';
       return;
     }
 
@@ -689,8 +721,8 @@
       
       div.innerHTML = `
         <div>
-          <strong>${arch.name}</strong>
-          <div style="font-size:0.8rem; color:var(--text-sub)">Pieśni: ${(arch.songIds || []).length}</div>
+          <strong style="font-family: 'Playfair Display', serif;">${arch.name}</strong>
+          <div style="font-size:0.78rem; color:var(--text-sub); margin-top:2px;">Pieśni: ${(arch.songIds || []).length}</div>
         </div>
         <div style="display:flex; gap:6px;">
           <button class="btn btn-secondary btn-small" onclick="loadArchive('${arch.id}')">📂 Otwórz</button>
@@ -807,7 +839,7 @@
     
     if (currentTransposeSteps !== 0) {
       const capoFret = (12 - currentTransposeSteps) % 12;
-      capoBadge = `<div class="capo-badge">🎸 capo ${capoFret}</div><br>`;
+      capoBadge = `<div class="capo-badge">🎸 Capo ${capoFret}</div><br>`;
     }
 
     chordsEl.innerHTML = capoBadge + transposed;
@@ -875,7 +907,7 @@
     isScrolling = false;
     clearInterval(scrollInterval);
     const btn = document.getElementById('btn-scroll');
-    if (btn) btn.innerText = "📜 Auto Scroll";
+    if (btn) btn.innerText = "📜 Scroll";
   }
 
   window.toggleRepertuar = async function(id) {
@@ -1013,7 +1045,7 @@
       window.showView('view-songs');
     } catch (e) {
       console.error("Błąd zapisu do chmury:", e);
-      alert("Błąd zapisu w chmurze! Sprawdź reguły Firebase Firestore.");
+      alert("Błąd zapisu w chmurze!");
     }
   };
 
