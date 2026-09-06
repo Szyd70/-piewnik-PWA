@@ -76,7 +76,7 @@
       letter-spacing: -0.2px; 
     }
 
-    /* BANER */
+    /* BANER - Dostosowany do grafiki z przezroczystością */
     .banner-container {
       width: 100%;
       height: 220px;
@@ -85,6 +85,19 @@
       margin-bottom: 20px;
       box-shadow: var(--shadow);
       border: 1px solid var(--border);
+      background-color: var(--announcement-bg); /* Neutralne tło dla przezroczystości */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 10px;
+    }
+
+    .banner-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain; /* Gwarantuje, że cała grafika zmieści się bez ucinania */
+      object-position: center; /* Wycentrowanie w pionie i poziomie */
+      display: block;
     }
 
     /* SEKCJA OGŁOSZEŃ */
@@ -291,7 +304,7 @@
   <!-- EKRAN GŁÓWNY -->
   <div id="view-home">
     <div class="banner-container">
-      <img src="1788684520282.png" alt="Baner Śpiewnik" style="width: 100%; height: 100%; object-fit: cover; object-position: top center; display: block;">
+      <img src="1788684520282.png" alt="Baner Śpiewnik">
     </div>
 
     <!-- SEKCJA BIEŻĄCYCH OGŁOSZEŃ -->
