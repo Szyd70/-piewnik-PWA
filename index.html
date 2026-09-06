@@ -76,7 +76,6 @@
       letter-spacing: -0.2px; 
     }
 
-    /* BANER - Wypełnienie od lewej do prawej */
     .banner-container {
       width: 100%;
       height: 220px;
@@ -100,7 +99,6 @@
       display: block;
     }
 
-    /* SEKCJA OGŁOSZEŃ */
     .announcement-box {
       background-color: var(--announcement-bg);
       border: 1px solid var(--announcement-border);
@@ -825,6 +823,7 @@
         console.error("Błąd zapisu roli liturgicznej:", e);
       }
     }
+    renderRepertuar();
   };
 
   window.openSong = function(id) {
@@ -967,6 +966,7 @@
         console.error("Błąd zapisu repertuaru:", e);
       }
     }
+    renderAll();
   };
 
   window.saveRepertuarToArchive = async function() {
@@ -995,11 +995,9 @@
     const arch = archives.find(a => a.id === id);
     if (!arch) return;
     
-    // 1. Przypisujemy dane lokalnie
-    repertuarIds = [...(arch.songIds || [])];
-    repertuarRoles = { ...(arch.roles || {}) };
+    repertuarIds = Array.isArray(arch.songIds) ? [...arch.songIds] : [];
+    repertuarRoles = arch.roles ? { ...arch.roles } : {};
 
-    // 2. Jeśli jestesmy adminem, aktualizujemy chmurę dla wszystkich
     if (db && isAdmin) {
       try {
         await setDoc(doc(db, "repertuar", "current"), { 
@@ -1011,8 +1009,7 @@
       }
     }
 
-    // 3. Wymuszamy natychmiastowe renderowanie listy na ekranie
-    renderRepertuar();
+    renderAll();
     showView('view-repertuar');
   };
 
